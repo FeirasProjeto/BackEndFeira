@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String     @id @default(uuid()) @db.VarChar(36)
+  nome      String
+  email     String
+  senha     String
+  telefone  String?
+  feirante  Boolean    @default(false)
+  feiras    Feira[]
+  favoritos Favorito[]
+
+  @@map("users")
+}
+
+model Favorito {
+  id      String @id @default(uuid()) @db.VarChar(36)
+  userId  String
+  feiraId String
+  feira   Feira  @relation(fields: [feiraId], references: [id])
+  user    User   @relation(fields: [userId], references: [id])
+
+  @@map("favoritos")
+}
+
+model Tag {
+  id     String     @id @default(uuid()) @db.VarChar(36)
+  nome   String
+  feiras FeiraTag[]
+}
+
+model Feira {
+  id          String           @id @default(uuid()) @db.VarChar(36)
+  nome        String
+  endereco    String
+  numero      String
+  cidade      String
+  localizacao String
+  horario     String
+  data        DateTime?
+  descricao   String?
+  imagem      String?
+  tags        FeiraTag[]
+  user        User             @relation(fields: [userId], references: [id])
+  userId      String
+  favoritos   Favorito[]
+  diaSemana   DiaSemanaFeira[]
+}
+
+model DiaSemana {
+  id     String           @id @default(uuid()) @db.VarChar(36)
+  nome   String
+  feiras DiaSemanaFeira[]
+
+  @@map("diaSemana")
+}
+
+model DiaSemanaFeira {
+  diaSemanaId String
+  feiraId     String
+  feira       Feira     @relation(fields: [feiraId], references: [id])
+  diaSemana   DiaSemana @relation(fields: [diaSemanaId], references: [id])
+
+  @@id([diaSemanaId, feiraId])
+  @@map("diaSemanaFeira")
+}
+
+model FeiraTag {
+  tagId   String
+  feiraId String
+  tag     Tag    @relation(fields: [tagId], references: [id])
+  feira   Feira  @relation(fields: [feiraId], references: [id])
+
+  @@id([tagId, feiraId])
+  @@map("feiraTag")
+}
