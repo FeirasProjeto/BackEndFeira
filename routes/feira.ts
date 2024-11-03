@@ -13,10 +13,10 @@ router.get("/", async (req, res) => {
 
 // Read
 router.post("/", async (req, res) => {
-  const { nome, endereco, numero, cidade, localizacao, descricao, imagem, userId  } = req.body
+  const { nome, endereco, numero, cidade, localizacao, horario, data, descricao, imagem, userId  } = req.body
 
   const feira = await prisma.feira.create({
-    data: { nome, endereco, numero, cidade, localizacao, descricao, imagem, userId  }
+    data: { nome, endereco, numero, cidade, localizacao, horario, data, descricao, imagem, userId }
   })
   res.status(201).json(feira)
 })
