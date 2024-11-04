@@ -24,7 +24,11 @@ app.use("/feira", feiraRoutes)
 app.use("/favorito", favoritoRoutes)
 
 
-app.use('', swaggerUi.serve, swaggerUi.setup(swaggerDoc))
+app.use('/', swaggerUi.serve)
+
+app.get('/', swaggerUi.setup(swaggerDoc))
+
+
 
 app.listen(port, () => {
   console.log(`Servidor rodando na porta: http://localhost:${port}`)
