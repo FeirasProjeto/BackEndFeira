@@ -3,9 +3,9 @@ import swaggerUi from 'swagger-ui-express'
 import YAML from 'yamljs'
 import path from 'path'
 
-const caminho = path.resolve(__dirname, 'swaggerDoc.yaml')
+const caminho = path.resolve(__dirname, 'swaggerDoc.json')
 
-const swaggerDoc = YAML.load(caminho)
+const swaggerDoc = require(caminho)
 
 
 const app = express()
