@@ -1,14 +1,16 @@
 import express from 'express'
 import swaggerUi from 'swagger-ui-express'
-import swaggerjsdoc from 'swagger-jsdoc'
 import YAML from 'yamljs'
+import path from 'path'
 
-const swaggerDoc = YAML.load('./swaggerDoc.yaml')
+const caminho = path.resolve(__dirname, 'swaggerDoc.yaml')
+
+const swaggerDoc = YAML.load(caminho)
 
 
 const app = express()
-const port = 3000
-// const port = process.env.PORT ?? 3000
+// const port = 3000
+const port = process.env.PORT ?? 3000
 
 
 
