@@ -5,18 +5,39 @@ const prisma = new PrismaClient()
 const router = Router()
 
 // CRUD 
-// Create
+// Read
 router.get("/", async (req, res) => {
   const feiras = await prisma.feira.findMany()
   res.status(200).json(feiras)
 })
 
-// Read
+// Get feira especifica
+router.get("/:id", async (req, res) => {
+  const { id } = req.params
+
+  const feira = await prisma.feira.findUnique({
+    where: { id: id}
+  })
+  res.status(200).json(feira)
+})
+
+// filtros
+router.get("/:id", async (req, res) => {
+  const { id } = req.params
+
+  const feira = await prisma.feira.findUnique({
+    where: { id: id}
+  })
+  res.status(200).json(feira)
+})
+
+
+// Create
 router.post("/", async (req, res) => {
-  const { nome, endereco, numero, cidade, localizacao, horario, data, descricao, imagem, userId  } = req.body
+  const { nome, endereco, numero, cidade, coordenada, horario, data, descricao, imagem, userId  } = req.body
 
   const feira = await prisma.feira.create({
-    data: { nome, endereco, numero, cidade, localizacao, horario, data, descricao, imagem, userId }
+    data: { nome, endereco, numero, cidade, coordenada, horario, data: new Date(data), descricao, imagem, userId }
   })
   res.status(201).json(feira)
 })

@@ -120,6 +120,4 @@ router.delete("/:id", async (req, res) => {
   res.status(200).json(user)
 })
 
-
-
 export default router

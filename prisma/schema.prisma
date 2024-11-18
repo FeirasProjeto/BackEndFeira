@@ -43,21 +43,21 @@ model Tag {
 }
 
 model Feira {
-  id          String           @id @default(uuid()) @db.VarChar(36)
-  nome        String
-  endereco    String
-  numero      String
-  cidade      String
-  localizacao String
-  horario     String
-  data        DateTime?
-  descricao   String?
-  imagem      String?
-  tags        FeiraTag[]
-  user        User             @relation(fields: [userId], references: [id])
-  userId      String
-  favoritos   Favorito[]
-  diaSemana   DiaSemanaFeira[]
+  id         String           @id @default(uuid()) @db.VarChar(36)
+  nome       String
+  endereco   String
+  numero     String
+  cidade     String
+  coordenada String //-26.308418, -55.130870
+  horario    String
+  data       DateTime?
+  descricao  String?
+  imagem     String?
+  tags       FeiraTag[]
+  user       User             @relation(fields: [userId], references: [id])
+  userId     String
+  favoritos  Favorito[]
+  diaSemana  DiaSemanaFeira[]
 }
 
 model DiaSemana {
