@@ -544,9 +544,9 @@
             "type": "string",
             "example": "São Paulo"
           },
-          "localizacao": {
+          "coordenada": {
             "type": "string",
-            "example": "Praça Central"
+            "example": "-31.7695952071496, -52.34144075544093"
           },
           "horario": {
             "type": "string",
