@@ -54,6 +54,7 @@ router.get("/", async (req, res) => {
         nome: true,
         email: true,
         feirante: true,
+        telefone: true,
         _count:{select:{favoritos:true}} }
       }
     )

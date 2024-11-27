@@ -52,7 +52,7 @@ model Feira {
   horario    String
   data       DateTime?
   descricao  String?
-  imagem     String?
+  imagem     String? @db.Text
   tags       FeiraTag[]
   user       User             @relation(fields: [userId], references: [id])
   userId     String

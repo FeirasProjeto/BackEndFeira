@@ -54,7 +54,30 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/User"
+                "type": "object",
+                "properties": {
+                "nome": {
+                  "type": "string",
+                  "example": "João Silva"
+                },
+                "email": {
+            "type": "string",
+            "example": "joao.silva@email.com"
+          },
+          "senha": {
+          "type": "string",
+          "example": "Senha123!"
+            
+          },
+          "telefone": {
+            "type": "string",
+            "example": "+55 11 91234-5678"
+          },
+          "feirante": {
+            "type": "boolean"
+          }
+                
+                }
               }
             }
           }
@@ -65,7 +88,35 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/User"
+                  
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "example": "07731e94-df84-4f00-98ac-972c469bdf66"
+                  },
+                "nome": {
+                  "type": "string",
+                  "example": "João Silva"
+                },
+                "email": {
+            "type": "string",
+            "example": "joao.silva@email.com"
+          },
+          "senha": {
+          "type": "string",
+          "example": "$2b$12$y4TTJih/asTQGJEBSBJlo.yP6Hv/.Ci5z1bTWUf3Mm1an10aUe16m"
+            
+          },
+          "telefone": {
+            "type": "string",
+            "example": "+55 11 91234-5678"
+          },
+          "feirante": {
+            "type": "boolean"
+          }
+                
+                }
                 }
               }
             }
@@ -496,9 +547,18 @@
           },
           "feirante": {
             "type": "boolean"
+          },
+          "_count": {
+            "type": "object",
+            "properties": {
+            "favoritos": {
+              "type": "number",
+              "example": 2
+            }
           }
         }
-      },
+          }
+        },
       "Favorito": {
         "type": "object",
         "properties": {
@@ -523,11 +583,6 @@
       "Feira": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "example": "10"
-          },
           "nome": {
             "type": "string",
             "example": "Feira Orgânica Centro"
@@ -565,15 +620,6 @@
             "type": "string",
             "example": "http://example.com/imagem.jpg"
           },
-          "status": {
-            "type": "string",
-            "example": "ativa",
-            "enum": [
-              "ativa",
-              "encerrada",
-              "pendente"
-            ]
-          },
           "diaSemana": {
             "type": "array",
             "items": {
@@ -585,6 +631,11 @@
             "items": {
               "$ref": "#/components/schemas/Tag"
             }
+          },
+          "userId": {
+            "type": "string",
+            "example": "c1a45f50-f8a4-4dc1-b9f3-d3a7e556a813"
+            
           }
         }
       },
@@ -595,10 +646,6 @@
             "type": "string",
             "format": "uuid",
             "example": "d1b0bfa6-5a6f-4efb-8eb5-c8c4c1c5ee5a"
-          },
-          "nome": {
-            "type": "string",
-            "example": "Segunda-feira"
           }
         }
       },
@@ -609,10 +656,6 @@
             "type": "string",
             "format": "uuid",
             "example": "t2a1b8d5-1f7f-4c51-83c0-4a8db24ab70d"
-          },
-          "nome": {
-            "type": "string",
-            "example": "Orgânico"
           }
         }
       }

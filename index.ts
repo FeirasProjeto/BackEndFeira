@@ -17,6 +17,7 @@ const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger
 import userRoutes from './routes/user'
 import feiraRoutes from './routes/feira'
 import favoritoRoutes from './routes/favorito'
+import tagRoutes from './routes/tag'
 
 app.use(express.json())
 app.use(cors())
@@ -24,6 +25,7 @@ app.use(cors())
 app.use("/usuario", userRoutes)
 app.use("/feira", feiraRoutes)
 app.use("/favorito", favoritoRoutes)
+app.use("/tag", tagRoutes)
 
 
 app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerDoc, {customCssUrl: CSS_URL, }))
