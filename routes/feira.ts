@@ -19,10 +19,15 @@ router.get("/", async (req, res) => {
                 nome: true
               }
             }
-            }
+          }
+        },
+        diaSemana: {
+          select: {
+            diaSemana: true
           }
         }
       }
+    }
   );
   res.status(200).json(feiras);
 });
@@ -49,48 +54,14 @@ router.get("/:id", async (req, res) => {
 
 // Create
 router.post("/", async (req, res) => {
-  const {
-    nome,
-    endereco,
-    numero,
-    cidade,
-    coordenada,
-    horario,
-    data,
-    descricao,
-    imagem,
-    tags,
-    userId,
-  } = req.body;
+  const { nome, endereco, numero, cidade, coordenada, horario, data, descricao, imagem, tags, diaSemana, userId } = req.body;
 
-  if (
-    !nome ||
-    !endereco ||
-    !numero ||
-    !cidade ||
-    !coordenada ||
-    !horario ||
-    !imagem ||
-    !userId
-  ) {
-    return res
-      .status(400)
-      .json({ message: "Todos os campos devem ser preenchidos" });
+  if (!nome || !endereco || !numero || !cidade || !coordenada || !horario || !imagem || !userId) {
+    return res.status(400).json({ message: "Todos os campos devem ser preenchidos" });
   }
 
   const feira = await prisma.feira.create({
-    data: {
-      nome,
-      endereco,
-      numero,
-      cidade,
-      coordenada,
-      horario,
-      data: new Date(data),
-      descricao,
-      imagem,
-      userId,
-    },
+    data: { nome, endereco, numero, cidade, coordenada, horario, descricao, imagem, userId },
   });
 
   for (const tag of tags) {
@@ -102,7 +73,25 @@ router.post("/", async (req, res) => {
     });
   }
 
-  res.status(201).json(feira);
+  if (diaSemana.length > 0) {
+
+    for (const dia of diaSemana) {
+      const diaSemanaFeira = await prisma.diaSemanaFeira.create({
+        data: {
+          diaSemanaId: dia.id,
+          feiraId: feira.id,
+        },
+      });
+    }
+    res.status(201).json(feira);
+  } else {
+    const feiraDia = await prisma.feira.update({
+      where: { id: feira.id },
+      data: { data: new Date(data) },
+    });
+    res.status(201).json(feiraDia);
+  }
+
 });
 
 // Update
