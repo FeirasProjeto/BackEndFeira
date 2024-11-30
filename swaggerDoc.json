@@ -56,27 +56,25 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                "nome": {
-                  "type": "string",
-                  "example": "João Silva"
-                },
-                "email": {
-            "type": "string",
-            "example": "joao.silva@email.com"
-          },
-          "senha": {
-          "type": "string",
-          "example": "Senha123!"
-            
-          },
-          "telefone": {
-            "type": "string",
-            "example": "+55 11 91234-5678"
-          },
-          "feirante": {
-            "type": "boolean"
-          }
-                
+                  "nome": {
+                    "type": "string",
+                    "example": "João Silva"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "joao.silva@email.com"
+                  },
+                  "senha": {
+                    "type": "string",
+                    "example": "Senha123!"
+                  },
+                  "telefone": {
+                    "type": "string",
+                    "example": "+55 11 91234-5678"
+                  },
+                  "feirante": {
+                    "type": "boolean"
+                  }
                 }
               }
             }
@@ -88,35 +86,32 @@
             "content": {
               "application/json": {
                 "schema": {
-                  
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string",
-                    "example": "07731e94-df84-4f00-98ac-972c469bdf66"
-                  },
-                "nome": {
-                  "type": "string",
-                  "example": "João Silva"
-                },
-                "email": {
-            "type": "string",
-            "example": "joao.silva@email.com"
-          },
-          "senha": {
-          "type": "string",
-          "example": "$2b$12$y4TTJih/asTQGJEBSBJlo.yP6Hv/.Ci5z1bTWUf3Mm1an10aUe16m"
-            
-          },
-          "telefone": {
-            "type": "string",
-            "example": "+55 11 91234-5678"
-          },
-          "feirante": {
-            "type": "boolean"
-          }
-                
-                }
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "07731e94-df84-4f00-98ac-972c469bdf66"
+                    },
+                    "nome": {
+                      "type": "string",
+                      "example": "João Silva"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "joao.silva@email.com"
+                    },
+                    "senha": {
+                      "type": "string",
+                      "example": "$2b$12$y4TTJih/asTQGJEBSBJlo.yP6Hv/.Ci5z1bTWUf3Mm1an10aUe16m"
+                    },
+                    "telefone": {
+                      "type": "string",
+                      "example": "+55 11 91234-5678"
+                    },
+                    "feirante": {
+                      "type": "boolean"
+                    }
+                  }
                 }
               }
             }
@@ -521,6 +516,212 @@
           }
         }
       }
+    },
+    "/tag": {
+      "get": {
+        "tags": [
+          "Tag"
+        ],
+        "summary": "Lista todas as tags",
+        "description": "Retorna a lista de todas as tags cadastradas",
+        "operationId": "getTags",
+        "responses": {
+          "200": {
+            "description": "Lista de tags encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Tag"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Tag"
+        ],
+        "summary": "Adiciona uma nova tag",
+        "description": "Cria uma nova tag e insere no banco de dados",
+        "operationId": "addTag",
+        "requestBody": {
+          "description": "Dados da nova tag",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nome": {
+                    "type": "string",
+                    "example": "Fruta"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Tag criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tag"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrada inválida"
+          }
+        }
+      }
+    },
+    "/tag/{tagId}": {
+      "get": {
+        "tags": [
+          "Tag"
+        ],
+        "summary": "Encontra tag pelo ID",
+        "description": "Retorna uma tag específica pelo ID",
+        "operationId": "getTagById",
+        "parameters": [
+          {
+            "name": "tagId",
+            "in": "path",
+            "description": "ID da tag a ser encontrada",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação bem-sucedida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tag"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ID inválido fornecido"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Tag"
+        ],
+        "summary": "Remove uma tag pelo ID",
+        "description": "Remove uma tag pelo ID",
+        "operationId": "deleteTagById",
+        "parameters": [
+          {
+            "name": "tagId",
+            "in": "path",
+            "description": "ID da tag a ser deletada",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação bem-sucedida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "t2a1b8d5-1f7f-4c51-83c0-4a8db24ab70d"
+                    },
+                    "nome": {
+                      "type": "string",
+                      "example": "Fruta"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ID inválido fornecido"
+          }
+        }
+      }
+    },
+    "/diaSemana": {
+      "get": {
+        "tags": [
+          "DiaSemana"
+        ],
+        "summary": "Lista todos os dias da semana",
+        "description": "Retorna a lista de todos os dias da semana cadastrados",
+        "operationId": "getDiaSemana",
+        "responses": {
+          "200": {
+            "description": "Lista de dias da semana encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DiaSemana"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/diaSemana/{diaSemanaId}": {
+      "get": {
+        "tags": [
+          "DiaSemana"
+        ],
+        "summary": "Encontra dia da semana pelo ID",
+        "description": "Retorna um dia da semana específico pelo ID",
+        "operationId": "getDiaSemanaById",
+        "parameters": [
+          {
+            "name": "diaSemanaId",
+            "in": "path",
+            "description": "ID do dia da semana a ser encontrado",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {          
+          "200": {
+            "description": "Operação bem-sucedida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiaSemana"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ID inválido fornecido"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -551,14 +752,14 @@
           "_count": {
             "type": "object",
             "properties": {
-            "favoritos": {
-              "type": "number",
-              "example": 2
+              "favoritos": {
+                "type": "number",
+                "example": 2
+              }
             }
           }
         }
-          }
-        },
+      },
       "Favorito": {
         "type": "object",
         "properties": {
@@ -623,19 +824,18 @@
           "diaSemana": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/DiaSemana"
+              "example": "d1b0bfa6-5a6f-4efb-8eb5-c8c4c1c5ee5a"
             }
           },
           "tags": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Tag"
+              "example": "t2a1b8d5-1f7f-4c51-83c0-4a8db24ab70d"
             }
           },
           "userId": {
             "type": "string",
             "example": "c1a45f50-f8a4-4dc1-b9f3-d3a7e556a813"
-            
           }
         }
       },
@@ -646,6 +846,10 @@
             "type": "string",
             "format": "uuid",
             "example": "d1b0bfa6-5a6f-4efb-8eb5-c8c4c1c5ee5a"
+          },
+          "nome": {
+            "type": "string",
+            "example": "Sábado"
           }
         }
       },
@@ -656,6 +860,10 @@
             "type": "string",
             "format": "uuid",
             "example": "t2a1b8d5-1f7f-4c51-83c0-4a8db24ab70d"
+          },
+          "nome": {
+            "type": "string",
+            "example": "Fruta"
           }
         }
       }
