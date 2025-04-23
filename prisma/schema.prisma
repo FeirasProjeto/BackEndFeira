@@ -14,14 +14,18 @@ datasource db {
 }
 
 model User {
-  id        String     @id @default(uuid()) @db.VarChar(36)
-  nome      String
-  email     String
-  senha     String
-  telefone  String?
-  feirante  Boolean    @default(false)
-  feiras    Feira[]
-  favoritos Favorito[]
+  id         String     @id @default(uuid()) @db.VarChar(36)
+  nome       String
+  email      String
+  senha      String
+  imagem     String?
+  bloqueado  Boolean    @default(false)
+  token      String?
+  tentativas Int        @default(0)
+  telefone   String?
+  feirante   Boolean    @default(false)
+  feiras     Feira[]
+  favoritos  Favorito[]
 
   @@map("users")
 }
@@ -52,7 +56,7 @@ model Feira {
   horario    String
   data       DateTime?
   descricao  String?
-  imagem     String? @db.Text
+  imagem     String?          @db.Text
   tags       FeiraTag[]
   user       User             @relation(fields: [userId], references: [id])
   userId     String
