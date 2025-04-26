@@ -13,8 +13,8 @@ async function enviaEmail(nome: string, email: string, codigo: string) {
         port: 587,
         secure: false, // true for port 465, false for other ports
         auth: {
-            user: "b45e97ef93c232",
-            pass: "c37530d33777ac",
+            user: "ca1905d4362ef7",
+            pass: "2c8283f5447238",
         },
     });
 

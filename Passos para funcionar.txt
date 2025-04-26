@@ -1,7 +1,0 @@
-npm i
-npm install @prisma/client
-
-alterar o port no index.ts
-
-apos alterar schema
-npx prisma migrate dev --name nome_da_migração
