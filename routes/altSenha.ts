@@ -27,12 +27,20 @@ async function enviaEmail(nome: string, email: string, codigo: string) {
             <h3>Seu codigo de Verificação é:</h3>
             <h1>${codigo}</h1>`, // html body
         });
+
+    return info;
 }
 
 router.post("/criaCodigo", async (req, res) => {
     const { usuarioEmail } = req.body;
 
     try {
+        // Verifica se o e-mail foi informado
+        if (!usuarioEmail) {
+            res.status(400).json({ erro: "Informe o e-mail do usuário" });
+            return;
+        }
+
         const usuario = await prisma.user.findFirst({
             where: { email: usuarioEmail },
         });
@@ -49,9 +57,11 @@ router.post("/criaCodigo", async (req, res) => {
             data: { token: recuperacao.toString() },
         });
 
-        await enviaEmail(usuario.nome, usuario.email, recuperacao.toString());
+        const resultadoEmail = await enviaEmail(usuario.nome, usuario.email, recuperacao.toString());
 
-        res.status(200).json({ mensagem: "Código enviado com sucesso" });
+        
+        res.status(200).json({ mensagem: "Código de verificação enviado com sucesso",
+            detalhes: resultadoEmail });
     } catch (error) {
         res.status(400).json(error);
     }
