@@ -83,12 +83,12 @@ router.post("/verificaCodigo", async (req, res) => {
         res.status(400).json({ erro: "Código de Verificação inválido" });
         return;
     }else {
-        res.status(200).json({ mensagem: "Código Valido" });
+        res.status(200).json({ mensagem: "Código Valido", userId: usuario.id });
     }
 })
 
 router.post("/:usuarioId", async (req, res) => {
-    const { novaSenha, novaSenha2, codigo } = req.body;
+    const { novaSenha, novaSenha2 } = req.body;
     const { usuarioId } = req.params;
 
     if (!novaSenha || !novaSenha2) {
@@ -101,19 +101,9 @@ router.post("/:usuarioId", async (req, res) => {
         return;
     }
 
-    if (!codigo) {
-        res.status(400).json({ erro: "Insira o Código de Verificação" });
-        return;
-    }
-
     const usuario = await prisma.user.findUnique({
         where: { id: usuarioId },
     });
-
-    if (usuario?.token !== codigo) {
-        res.status(400).json({ erro: "Código de Verificação inválido" });
-        return;
-    }
 
     try {
 
