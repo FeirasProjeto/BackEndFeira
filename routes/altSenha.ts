@@ -1,35 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import { Router } from "express";
 import bcrypt from "bcrypt";
-import nodemailer from "nodemailer";
+import { enviaEmail } from "../uteis/enviaEmail";
 
 const prisma = new PrismaClient();
 const router = Router();
-
-async function enviaEmail(nome: string, email: string, codigo: string) {
-
-    const transporter = nodemailer.createTransport({
-        host: "sandbox.smtp.mailtrap.io",
-        port: 587,
-        secure: false, // true for port 465, false for other ports
-        auth: {
-            user: "ca1905d4362ef7",
-            pass: "2c8283f5447238",
-        },
-    });
-
-        const info = await transporter.sendMail({
-            from: 'feirass.projeto@gmail.com', // sender address
-            to: email, // list of receivers
-            subject: "Codigo de alteração de senha", // Subject line
-            text: codigo, // plain text body
-            html: `<h2>Olá, ${nome}</h2>
-            <h3>Seu codigo de Verificação é:</h3>
-            <h1>${codigo}</h1>`, // html body
-        });
-
-    return info;
-}
 
 router.post("/criaCodigo", async (req, res) => {
     const { usuarioEmail } = req.body;
