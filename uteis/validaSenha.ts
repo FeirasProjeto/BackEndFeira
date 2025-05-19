@@ -31,7 +31,7 @@ export function validaSenha(senha: string) {
   }
 
   if (pequenas == 0 || grandes == 0 || numeros == 0 || simbolos == 0) {
-    mensa.push("Erro... senha deve possuir letras minúsculas, maiúsculas, números e símbolos")
+    mensa.push("A senha precisa ter ao menos 8 caracteres, incluindo letra maiúscula, minúscula, número e símbolo.")
   }
 
   return mensa
