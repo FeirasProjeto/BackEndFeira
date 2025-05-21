@@ -77,9 +77,10 @@ router.post("/:usuarioId", async (req, res) => {
         return;
     }
 
-    if (!validaSenha(novaSenha2)) {
-        res.status(400).json({ erro: "A senha precisa ter ao menos 8 caracteres, incluindo letra maiúscula, minúscula, número e símbolo." });
-        return;
+    const erros = validaSenha(novaSenha2)
+    if (erros.length > 0) {
+      res.status(400).json({ erro: erros.join("; ") })
+      return
     }
 
     const usuario = await prisma.user.findUnique({
