@@ -5,13 +5,13 @@ const prisma = new PrismaClient()
 const router = Router()
 
 // CRUD 
-// Create
+// Read
 router.get("/", async (req, res) => {
   const favoritos = await prisma.favorito.findMany()
   res.status(200).json(favoritos)
 })
 
-// Read
+// Create
 router.post("/", async (req, res) => {
   const { userId, feiraId } = req.body
 

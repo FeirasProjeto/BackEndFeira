@@ -10,7 +10,11 @@ router.get("/", async (req, res) => {
   const feiras = await prisma.feira.findMany(
     {
       include: {
-        favoritos: true,
+        _count: {
+          select: {
+            favoritos: true,
+          }
+        },
         tags: {
           select: {
             tag: {
