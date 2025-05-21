@@ -64,7 +64,7 @@ router.post("/verificaCodigo", async (req, res) => {
 })
 
 router.post("/:usuarioId", async (req, res) => {
-    const { novaSenha, novaSenha2 } = req.body;
+    const { novaSenha, novaSenha2, codigo } = req.body;
     const { usuarioId } = req.params;
 
     if (!novaSenha || !novaSenha2) {
@@ -86,6 +86,16 @@ router.post("/:usuarioId", async (req, res) => {
     const usuario = await prisma.user.findUnique({
         where: { id: usuarioId },
     });
+
+    if (!usuario) {
+        res.status(404).json({ erro: "Usuário não encontrado" });
+        return;
+    }
+
+    if (usuario.token !== codigo) {
+        res.status(400).json({ erro: "Código de Verificação inválido" });
+        return;
+    }
 
     try {
 
