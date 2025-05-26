@@ -14,16 +14,17 @@ datasource db {
 }
 
 model User {
-  id         String       @id @default(uuid()) @db.VarChar(36)
+  id         String      @id @default(uuid()) @db.VarChar(36)
+  createdAt  DateTime    @default(now())
   nome       String
   email      String
   senha      String
   imagem     String?
-  bloqueado  Boolean      @default(false)
+  bloqueado  Boolean     @default(false)
   token      String?
-  tentativas Int          @default(0)
+  tentativas Int         @default(0)
   telefone   String?
-  feirante   Boolean      @default(false)
+  feirante   Boolean     @default(false)
   feiras     Feira[]
   favoritos  Favorito[]
   Avaliacoes Avaliacao[]
@@ -49,6 +50,8 @@ model Tag {
 
 model Feira {
   id         String           @id @default(uuid()) @db.VarChar(36)
+  createdAt  DateTime         @default(now())
+  deleted    Boolean          @default(false)
   nome       String
   endereco   String
   numero     String
@@ -58,6 +61,7 @@ model Feira {
   data       DateTime?
   descricao  String?
   imagem     String?          @default("https://i.imgur.com/4Y0v1xk.png") @db.Text
+  avaliacao  Float?           @default(0)
   tags       FeiraTag[]
   user       User             @relation(fields: [userId], references: [id])
   userId     String
@@ -95,13 +99,14 @@ model FeiraTag {
 }
 
 model Avaliacao {
-  id         String  @id @default(uuid()) @db.VarChar(36)
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  createdAt  DateTime @default(now())
   nota       Int
-  comentario String? @db.VarChar(400)
+  comentario String?  @db.VarChar(400)
   feiraId    String
-  feira      Feira   @relation(fields: [feiraId], references: [id])
+  feira      Feira    @relation(fields: [feiraId], references: [id])
   userId     String
-  user       User    @relation(fields: [userId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
 
   @@map("avaliacoes")
 }

@@ -4,6 +4,23 @@ import { Router } from "express";
 const prisma = new PrismaClient();
 const router = Router();
 
+async function main() {
+  //SOFT DELETE MIDDLEWARE 
+  prisma.$use(async (params, next) => {
+    // Check incoming query type
+    if (params.model == "Feira") {
+      if (params.action == "delete") {
+        // Delete queries
+        // Change action to an update
+        params.action = "update";
+        params.args["data"] = { deleted: true };
+      }
+    }
+    return next(params);
+  });
+}
+main();
+
 // CRUD
 // Read
 router.get("/", async (req, res) => {
@@ -13,6 +30,7 @@ router.get("/", async (req, res) => {
         _count: {
           select: {
             favoritos: true,
+            Avaliacoes: true
           }
         },
         tags: {
@@ -28,6 +46,20 @@ router.get("/", async (req, res) => {
         diaSemana: {
           select: {
             diaSemana: true
+          }
+        },
+        Avaliacoes: {
+          select: {
+            id: true,
+            nota: true,
+            comentario: true,
+            user: {
+              select: {
+                id: true,
+                nome: true,
+                imagem: true
+              }
+            }
           }
         }
       }
