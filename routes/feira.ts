@@ -99,13 +99,13 @@ router.post("/", async (req, res) => {
 });
 
 // Update
-router.put("/:id", async (req, res) => {
+router.patch("/:id", async (req, res) => {
   const { id } = req.params;
-  const { nome } = req.body;
+  const { nome, endereco, numero, cidade, coordenada, horario, descricao, imagem } = req.body;
 
   const feira = await prisma.feira.update({
     where: { id: id },
-    data: { nome },
+    data: { nome, endereco, numero, cidade, coordenada, horario, descricao, imagem },
   });
   res.status(200).json(feira);
 });
