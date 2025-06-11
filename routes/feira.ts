@@ -26,6 +26,7 @@ main();
 router.get("/", async (req, res) => {
   const feiras = await prisma.feira.findMany(
     {
+      where: { deleted: false },
       include: {
         _count: {
           select: {
@@ -65,7 +66,123 @@ router.get("/", async (req, res) => {
       }
     }
   );
+  
   res.status(200).json(feiras);
+});
+
+
+// filtros
+router.get("/filtros", async (req, res) => {
+  const { tags, diaSemana, horario } = req.query;
+
+  const filters: any = {
+    deleted: false
+  };
+if (tags) {
+  const tagNomes = (tags as string).split(",");
+
+  const tagIds = await prisma.tag.findMany({
+    where: {
+      nome: {
+        in: tagNomes
+      }
+    },
+    select: { id: true }
+  });
+
+  const ids = tagIds.map(tag => tag.id);
+
+  filters.tags = {
+    some: {
+      tagId: {
+        in: ids
+      }
+    }
+  };
+}
+
+if (diaSemana) {
+  const nomesDias = (diaSemana as string).split(",");
+
+  const dias = await prisma.diaSemana.findMany({
+    where: {
+      nome: {
+        in: nomesDias
+      }
+    },
+    select: { id: true }
+  });
+
+  const ids = dias.map(dia => dia.id);
+
+  filters.diaSemana = {
+    some: {
+      diaSemanaId: {
+        in: ids
+      }
+    }
+  };
+}
+
+  if (horario) {
+    filters.horario = {
+      contains: horario as string,
+      mode: "insensitive"
+    };
+  }
+  
+  const feiras = await prisma.feira.findMany({
+    where: filters,
+    include: {
+      _count: {
+        select: {
+          favoritos: true,
+          Avaliacoes: true
+        }
+      },
+      tags: {
+        select: {
+          tag: {
+            select: {
+              id: true,
+              nome: true
+            }
+          }
+        }
+      },
+      diaSemana: {
+        select: {
+          diaSemana: true
+        }
+      },
+      Avaliacoes: {
+        select: {
+          id: true,
+          nota: true,
+          comentario: true,
+          user: {
+            select: {
+              id: true,
+              nome: true,
+              imagem: true
+            }
+          }
+        }
+      }
+    }
+  });
+  if (feiras.length > 0) {
+    res.status(200).json(feiras);
+  } else {
+    res.status(404).json({ message: "Nenhuma feira encontrada" });
+  }
+});
+
+// rota teste
+router.get("/test", async (req, res) => {
+  console.log("teste");
+
+  res.status(200).json({ message: "Rota de teste funcionando!" });
 });
 
 // Get feira especifica
@@ -73,17 +190,7 @@ router.get("/:id", async (req, res) => {
   const { id } = req.params;
 
   const feira = await prisma.feira.findUnique({
-    where: { id: id },
-  });
-  res.status(200).json(feira);
-});
-
-// filtros
-router.get("/:id", async (req, res) => {
-  const { id } = req.params;
-
-  const feira = await prisma.feira.findUnique({
-    where: { id: id },
+    where: { id: id, deleted: false },
   });
   res.status(200).json(feira);
 });
