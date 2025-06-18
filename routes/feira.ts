@@ -66,7 +66,7 @@ router.get("/", async (req, res) => {
       }
     }
   );
-  
+
   res.status(200).json(feiras);
 });
 
@@ -78,51 +78,51 @@ router.get("/filtros", async (req, res) => {
   const filters: any = {
     deleted: false
   };
-if (tags) {
-  const tagNomes = (tags as string).split(",");
+  if (tags) {
+    const tagNomes = (tags as string).split(",");
 
-  const tagIds = await prisma.tag.findMany({
-    where: {
-      nome: {
-        in: tagNomes
+    const tagIds = await prisma.tag.findMany({
+      where: {
+        nome: {
+          in: tagNomes
+        }
+      },
+      select: { id: true }
+    });
+
+    const ids = tagIds.map(tag => tag.id);
+
+    filters.tags = {
+      some: {
+        tagId: {
+          in: ids
+        }
       }
-    },
-    select: { id: true }
-  });
+    };
+  }
 
-  const ids = tagIds.map(tag => tag.id);
+  if (diaSemana) {
+    const nomesDias = (diaSemana as string).split(",");
 
-  filters.tags = {
-    some: {
-      tagId: {
-        in: ids
+    const dias = await prisma.diaSemana.findMany({
+      where: {
+        nome: {
+          in: nomesDias
+        }
+      },
+      select: { id: true }
+    });
+
+    const ids = dias.map(dia => dia.id);
+
+    filters.diaSemana = {
+      some: {
+        diaSemanaId: {
+          in: ids
+        }
       }
-    }
-  };
-}
-
-if (diaSemana) {
-  const nomesDias = (diaSemana as string).split(",");
-
-  const dias = await prisma.diaSemana.findMany({
-    where: {
-      nome: {
-        in: nomesDias
-      }
-    },
-    select: { id: true }
-  });
-
-  const ids = dias.map(dia => dia.id);
-
-  filters.diaSemana = {
-    some: {
-      diaSemanaId: {
-        in: ids
-      }
-    }
-  };
-}
+    };
+  }
 
   if (horario) {
     filters.horario = {
@@ -130,7 +130,7 @@ if (diaSemana) {
       mode: "insensitive"
     };
   }
-  
+
   const feiras = await prisma.feira.findMany({
     where: filters,
     include: {
@@ -197,54 +197,87 @@ router.get("/:id", async (req, res) => {
 
 // Create
 router.post("/", async (req, res) => {
-  const { nome, endereco, numero, cidade, coordenada, horario, data, descricao, imagem, tags, diaSemana, userId } = req.body;
+  const { nome, endereco, numero, cidade, coordenada, horarioInicio, horarioFim, data, descricao, imagem, tags, diaSemana, userId } = req.body;
 
-  if (!nome || !endereco || !numero || !cidade || !coordenada || !horario || !imagem || !userId) {
-    return res.status(400).json({ message: "Todos os campos devem ser preenchidos" });
+  if (!nome || !endereco || !numero || !cidade || !coordenada || !horarioInicio || !horarioFim || !userId) {
+    return res.status(400).json({ message: "Todos os campos devem ser preenchidos", campoFaltante: !nome ? "nome" : !endereco ? "endereco" : !numero ? "numero" : !cidade ? "cidade" : !coordenada ? "coordenada" : !horarioInicio ? "horarioInicio" : !horarioFim ? "horarioFim" : !userId ? "userId" : "" });
   }
+
+  let turno = "";
+  try {
+  if (horarioInicio && horarioFim) {
+
+    const [hora] = horarioInicio.split(":").map(Number);
+    const [horaFim] = horarioFim.split(":").map(Number);
+
+    if (hora < 12 && horaFim < 12) {
+      turno = "Manhã";
+    } else if (hora >= 12 && horaFim < 18) {
+      turno = "Tarde";
+    } else if (hora < 12 && horaFim <= 18) {
+      turno = "Manhã e Tarde";
+    } else if (hora >= 18 && horaFim >= 18) {
+      turno = "Noite";
+    } else if (hora >= 12 && horaFim >= 18) {
+      turno = "Tarde e Noite";
+    } else {
+      turno = "Dia inteiro";
+    }
+  }
+} catch (error) {
+  return res.status(400).json({ message: "Horário inválido" });
+}
 
   const feira = await prisma.feira.create({
-    data: { nome, endereco, numero, cidade, coordenada, horario, descricao, imagem, userId },
+    data: { nome, endereco, numero, cidade, coordenada, horarioInicio, horarioFim, descricao, imagem, userId, turno },
   });
 
-  for (const tag of tags) {
-    const feiraTag = await prisma.feiraTag.create({
-      data: {
-        feiraId: feira.id,
-        tagId: tag.id,
-      },
-    });
-  }
-
-  if (diaSemana.length > 0) {
-
-    for (const dia of diaSemana) {
-      const diaSemanaFeira = await prisma.diaSemanaFeira.create({
+  if (tags.length > 0) {
+    for (const tag of tags) {
+      const feiraTag = await prisma.feiraTag.create({
         data: {
-          diaSemanaId: dia.id,
           feiraId: feira.id,
+          tagId: tag.id,
         },
       });
     }
-    res.status(201).json(feira);
-  } else {
-    const feiraDia = await prisma.feira.update({
-      where: { id: feira.id },
-      data: { data: new Date(data) },
-    });
-    res.status(201).json(feiraDia);
   }
 
-});
+    if (diaSemana.length > 0) {
+
+      for (const dia of diaSemana) {
+        const diaSemana = await prisma.diaSemana.findFirst({
+          where: { nome: dia },
+        });
+        if (!diaSemana) {
+          return res.status(404).json({ message: `Dia da semana ${dia} não encontrado` });
+        }
+        const diaSemanaFeira = await prisma.diaSemanaFeira.create({
+          data: {
+            diaSemanaId: diaSemana.id,
+            feiraId: feira.id,
+          },
+        });
+      }
+      res.status(201).json(feira);
+    } else {
+      const feiraDia = await prisma.feira.update({
+        where: { id: feira.id },
+        data: { data: new Date(data) },
+      });
+      res.status(201).json(feiraDia);
+    }
+
+  });
 
 // Update
 router.patch("/:id", async (req, res) => {
   const { id } = req.params;
-  const { nome, endereco, numero, cidade, coordenada, horario, descricao, imagem } = req.body;
+  const { nome, endereco, numero, cidade, coordenada, horarioInicio, horarioFim, descricao, imagem, turno } = req.body;
 
   const feira = await prisma.feira.update({
     where: { id: id },
-    data: { nome, endereco, numero, cidade, coordenada, horario, descricao, imagem },
+    data: { nome, endereco, numero, cidade, coordenada, horarioInicio, horarioFim, descricao, imagem, turno },
   });
   res.status(200).json(feira);
 });
