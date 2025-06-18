@@ -178,11 +178,13 @@ router.get("/filtros", async (req, res) => {
   }
 });
 
-// rota teste
-router.get("/test", async (req, res) => {
-  console.log("teste");
-
-  res.status(200).json({ message: "Rota de teste funcionando!" });
+// Get feiras do usuário
+router.get("/usuario/:userId", async (req, res) => {
+  const { userId } = req.params;
+  const feiras = await prisma.feira.findMany({
+    where: { userId: userId, deleted: false },
+  });
+  res.status(200).json(feiras);
 });
 
 // Get feira especifica
