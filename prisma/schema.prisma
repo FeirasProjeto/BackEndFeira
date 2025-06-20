@@ -72,6 +72,7 @@ model Feira {
   Avaliacoes    Avaliacao[]
   categoria     Categoria?   @relation(fields: [categoriaId], references: [id])
   categoriaId   Int?
+  CategoriaFeira CategoriaFeira[]
 }
 
 model DiaSemana {
@@ -122,4 +123,15 @@ model Categoria {
   feiras Feira[]
 
   @@map("categorias")
+  CategoriaFeira CategoriaFeira[]
+}
+
+model CategoriaFeira {
+  categoriaId Int
+  feiraId     String 
+  feira       Feira     @relation(fields: [feiraId], references: [id])
+  categoria   Categoria @relation(fields: [categoriaId], references: [id])
+  
+  @@id([categoriaId, feiraId])
+  @@map("categoriaFeira")
 }

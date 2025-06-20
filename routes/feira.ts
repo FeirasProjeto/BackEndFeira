@@ -199,9 +199,9 @@ router.get("/:id", async (req, res) => {
 
 // Create
 router.post("/", async (req, res) => {
-  const { nome, endereco, numero, cidade, coordenada, horarioInicio, horarioFim, data, descricao, imagem, tags, diaSemana, userId } = req.body;
+  const { nome, endereco, numero, cidade, coordenada, horarioInicio, horarioFim, data, descricao, imagem, tags, diaSemana, userId, categoria } = req.body;
 
-  if (!nome || !endereco || !numero || !cidade || !coordenada || !horarioInicio || !horarioFim || !userId) {
+  if (!nome || !endereco || !numero || !cidade || !coordenada || !horarioInicio || !horarioFim || !userId || !categoria) {
     return res.status(400).json({ message: "Todos os campos devem ser preenchidos", campoFaltante: !nome ? "nome" : !endereco ? "endereco" : !numero ? "numero" : !cidade ? "cidade" : !coordenada ? "coordenada" : !horarioInicio ? "horarioInicio" : !horarioFim ? "horarioFim" : !userId ? "userId" : "" });
   }
 
@@ -266,6 +266,13 @@ router.post("/", async (req, res) => {
       const feiraDia = await prisma.feira.update({
         where: { id: feira.id },
         data: { data: new Date(data) },
+      });
+
+      const categoriaFeira = await prisma.categoriaFeira.create({
+        data: {
+          feiraId: feira.id,
+          categoriaId: categoria.id,
+        },
       });
       res.status(201).json(feiraDia);
     }
