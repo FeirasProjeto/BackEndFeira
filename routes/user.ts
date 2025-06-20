@@ -15,17 +15,33 @@ router.get("/", async (req, res) => {
         id: true,
         nome: true,
         email: true,
-        feirante: true,
         telefone: true,
-        _count:{select:{favoritos:true}} }
+        _count: { select: { favoritos: true } }
       }
-    )
-    res.status(200).json(users)
+    }
+  )
+  res.status(200).json(users)
+})
+
+router.get("/:id", async (req, res) => {
+  const { id } = req.params
+
+  const user = await prisma.user.findUnique({
+    where: { id: id },
+    select: {
+      id: true,
+      nome: true,
+      email: true,
+      telefone: true,
+      _count: { select: { favoritos: true } }
+    }
   })
-  
+  res.status(200).json(user)
+})
+
 // Create
 router.post("/", async (req, res) => {
-  const { nome, email, senha, feirante, telefone } = req.body
+  const { nome, email, senha, telefone } = req.body
 
   const erros = validaSenha(senha)
   if (erros.length > 0) {
@@ -53,7 +69,7 @@ router.post("/", async (req, res) => {
   // para o campo senha, atribui o hash gerado
   try {
     const user = await prisma.user.create({
-      data: { nome, email, senha: hash, feirante, telefone }
+      data: { nome, email, senha: hash, telefone }
     })
     res.status(201).json(user)
   } catch (error) {
@@ -62,13 +78,13 @@ router.post("/", async (req, res) => {
 })
 
 // Update
-router.put("/:id", async (req, res) => {
+router.patch("/:id", async (req, res) => {
   const { id } = req.params
-  const { feirante } = req.body
+  const { nome, email, telefone } = req.body
 
   const user = await prisma.user.update({
     where: { id: id },
-    data: { feirante }
+    data: { nome, email, telefone }
   })
   res.status(200).json(user)
 })
