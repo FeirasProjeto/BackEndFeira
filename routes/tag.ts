@@ -37,16 +37,32 @@ router.delete("/:id", async (req, res) => {
   const { id } = req.params
 
   try {
+    const feira = await prisma.feira.findMany({
+      where: {
+        tags: {
+          some: {
+            tagId: id
+          }
+        }
+      }
+    })
+
+    if (feira.length > 0) {
+
+      const deletedFeiraTag = await prisma.feiraTag.deleteMany({
+        where: {
+          tagId: id
+        }
+      })
+    }
   const tag = await prisma.tag.delete({
     where: { id: id }
   })
   res.status(200).json(tag)
   } catch (error) {
-    res.status(400).json({ error: "Id invalido" })
+    res.status(400).json({ message: "Id invalido", error: error })
   }
 })
-
-
 
 
 export default router
