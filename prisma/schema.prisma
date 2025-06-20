@@ -70,6 +70,8 @@ model Feira {
   favoritos     Favorito[]
   diaSemana     DiaSemanaFeira[]
   Avaliacoes    Avaliacao[]
+  categoria     Categoria?   @relation(fields: [categoriaId], references: [id])
+  categoriaId   Int?
 }
 
 model DiaSemana {
@@ -111,4 +113,13 @@ model Avaliacao {
   user       User     @relation(fields: [userId], references: [id])
 
   @@map("avaliacoes")
+}
+
+model Categoria {
+  id     Int     @id @default(autoincrement())
+  nome   String
+  cor    String
+  feiras Feira[]
+
+  @@map("categorias")
 }

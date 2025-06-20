@@ -22,6 +22,8 @@ import diaSemanaRoutes from './routes/diaSemana'
 import loginRoutes from './routes/login'
 import altSenhaRoutes from './routes/altSenha'
 import avaliacaoRoutes from './routes/avaliacao'
+import categoriaRoutes from './routes/categoria'
+
 
 app.use(express.json())
 app.use(cors())
@@ -34,7 +36,7 @@ app.use('/diaSemana', diaSemanaRoutes)
 app.use('/login', loginRoutes)
 app.use('/altSenha', altSenhaRoutes)
 app.use('/avaliacao', avaliacaoRoutes)
-
+app.use('/categoria', categoriaRoutes)
 
 
 app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerDoc, {customCssUrl: CSS_URL, }))
