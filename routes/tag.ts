@@ -5,36 +5,68 @@ import { z } from "zod"
 const prisma = new PrismaClient()
 const router = Router()
 
-// Schema Zod para validar criação de tag
+// Schema para uma tag
 const tagSchema = z.object({
   nome: z.string().min(1, "O campo 'nome' é obrigatório."),
   categoria: z.string().min(1, "O campo 'categoria' é obrigatório.")
 })
 
-// Read all tags
+// Schema para array de tags
+const multipleTagsSchema = z.array(tagSchema)
+
+// Listar todas as tags
 router.get("/", async (req, res) => {
   const tags = await prisma.tag.findMany()
   res.status(200).json(tags)
 })
 
-// Read tag by ID
+// Buscar tag por ID
 router.get("/:id", async (req, res) => {
   const { id } = req.params
-
   const tag = await prisma.tag.findUnique({
     where: { id: Number(id) }
   })
   res.status(200).json(tag)
 })
 
-// Create tag
+// Criar tag(s) - aceita um objeto ou um array de objetos
 router.post("/", async (req, res) => {
   try {
-    const data = tagSchema.parse(req.body) // <- Aqui validamos
-    const tag = await prisma.tag.create({
-      data
+    // Detecta se o corpo é array ou objeto e valida
+    let tagsData: Array<{ nome: string; categoria: string }>
+    if (Array.isArray(req.body)) {
+      tagsData = multipleTagsSchema.parse(req.body)
+    } else {
+      const singleTag = tagSchema.parse(req.body)
+      tagsData = [singleTag]
+    }
+
+    // Extrai categorias únicas das tags recebidas
+    const categoriasRecebidas = [...new Set(tagsData.map(t => t.categoria))]
+
+    // Busca categorias existentes no banco
+    const categoriasExistentes = await prisma.categoria.findMany({
+      where: { nome: { in: categoriasRecebidas } },
+      select: { nome: true }
     })
-    res.status(201).json(tag)
+
+    const nomesValidos = categoriasExistentes.map(c => c.nome)
+
+    // Verifica se há categorias inválidas
+    const invalidas = categoriasRecebidas.filter(cat => !nomesValidos.includes(cat))
+    if (invalidas.length > 0) {
+      return res.status(400).json({
+        message: "Categorias inválidas encontradas.",
+        categoriasInvalidas: invalidas
+      })
+    }
+
+    // Cria as tags (em transação para o array)
+    const tagsCriadas = await prisma.$transaction(
+      tagsData.map(tag => prisma.tag.create({ data: tag }))
+    )
+
+    res.status(201).json(tagsCriadas.length === 1 ? tagsCriadas[0] : tagsCriadas)
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({
@@ -46,7 +78,7 @@ router.post("/", async (req, res) => {
   }
 })
 
-// Delete tag
+// Deletar tag
 router.delete("/:id", async (req, res) => {
   const { id } = req.params
 
