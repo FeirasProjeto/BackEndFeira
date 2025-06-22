@@ -3,9 +3,17 @@ import { Router } from "express";
 import bcrypt from "bcrypt";
 import { enviaEmail } from "../uteis/enviaEmail";
 import { validaSenha } from "../uteis/validaSenha";
+import { z } from "zod";
 
 const prisma = new PrismaClient();
 const router = Router();
+
+const zodSchema = z.object({
+    usuarioEmail: z.string().email("E-mail inválido"),
+    novaSenha: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+    codigo: z.string().length(6, "O código deve ter exatamente 6 caracteres"),
+    novaSenha2: z.string().min(6, "A confirmação de senha deve ter pelo menos 6 caracteres"),
+});
 
 router.post("/criaCodigo", async (req, res) => {
     const { usuarioEmail } = req.body;

@@ -5,13 +5,13 @@ import { z } from "zod"
 const prisma = new PrismaClient()
 const router = Router()
 
-// ✅ Esquema de validação com Zod
+// Esquema de validação com Zod
 const categoriaSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
   cor: z.string().min(1, "Cor é obrigatória"),
 })
 
-// ✅ Listar categorias
+// Listar categorias
 router.get("/", async (req, res) => {
   try {
     const categorias = await prisma.categoria.findMany()
@@ -22,7 +22,7 @@ router.get("/", async (req, res) => {
   }
 })
 
-// ✅ Criar nova categoria
+// Criar nova categoria
 router.post("/", async (req, res) => {
   const parse = categoriaSchema.safeParse(req.body)
   if (!parse.success) {
@@ -48,7 +48,7 @@ router.post("/", async (req, res) => {
   }
 })
 
-// ✅ Deletar categoria por ID
+// Deletar categoria por ID
 router.delete("/:id", async (req, res) => {
   const id = Number(req.params.id)
   if (isNaN(id)) {
@@ -66,7 +66,7 @@ router.delete("/:id", async (req, res) => {
   }
 })
 
-// ✅ Atualizar categoria por ID
+// Atualizar categoria por ID
 router.put("/:id", async (req, res) => {
   const id = Number(req.params.id)
   if (isNaN(id)) {
