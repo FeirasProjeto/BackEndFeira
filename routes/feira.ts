@@ -240,6 +240,43 @@ router.get("/:id", async (req, res) => {
 
   const feira = await prisma.feira.findUnique({
     where: { id: id, deleted: false },
+    include: {
+      _count: {
+        select: {
+          favoritos: true,
+          Avaliacoes: true
+        }
+      },
+      tags: {
+        select: {
+          tag: {
+            select: {
+              id: true,
+              nome: true
+            }
+          }
+        }
+      },
+      diaSemana: {
+        select: {
+          diaSemana: true
+        }
+      },
+      Avaliacoes: {
+        select: {
+          id: true,
+          nota: true,
+          comentario: true,
+          user: {
+            select: {
+              id: true,
+              nome: true,
+              imagem: true
+            }
+          }
+        }
+      }
+    }
   });
   res.status(200).json(feira);
 });
