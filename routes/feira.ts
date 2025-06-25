@@ -306,3 +306,13 @@ router.delete("/:id", async (req, res) => {
 });
 
 export default router;
+
+// Delete
+router.delete("/delete/:id", async (req, res) => {
+  const { id } = req.params;
+
+  const feira = await prisma.feira.delete({
+    where: { id: id },
+  });
+  res.status(200).json(feira);
+});
