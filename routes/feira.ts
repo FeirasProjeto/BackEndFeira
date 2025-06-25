@@ -73,10 +73,14 @@ router.get("/", async (req, res) => {
 
 // filtros
 router.get("/filtros", async (req, res) => {
-  const { tags, diaSemana, horario } = req.query;
+  const { tags, diaSemana, horario, pesquisa } = req.query;
 
   const filters: any = {
-    deleted: false
+    deleted: false,
+    nome: {
+      contains: pesquisa as string,
+      mode: "insensitive"
+    }
   };
   if (tags) {
     const tagNomes = (tags as string).split(",");
