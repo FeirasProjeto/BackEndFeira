@@ -1,9 +1,52 @@
 import { PrismaClient } from "@prisma/client";
 import { Router } from "express";
+import {z} from "zod";
 
 const prisma = new PrismaClient();
 const router = Router();
 
+const feiraSchema = z.object({
+  nome: z.string().min(1, "Nome é obrigatório"),
+  endereco: z.string().min(1, "Endereço é obrigatório"),
+  numero: z.string().min(1, "Número é obrigatório"),
+  cidade: z.string().min(1, "Cidade é obrigatória"),
+  coordenada: z.string().min(1, "Coordenada é obrigatória"),
+  horarioInicio: z.string().min(1, "Horário de início é obrigatório"),
+  horarioFim: z.string().min(1, "Horário de fim é obrigatório"),
+  descricao: z.string().optional(),
+  imagem: z.string().optional(),
+  tags: z.array(z.object({
+    id: z.string().uuid(),
+  })).optional(),
+  diaSemana: z.array(z.object({
+    nome: z.string().min(1, "Dia da semana é obrigatório"),
+  })).optional(),  
+  Avaliacoes: z.array(z.object({
+    id: z.string().uuid(),
+    nota: z.number().min(1, "Nota deve ser maior ou igual a 1").max(5, "Nota deve ser menor ou igual a 5"),
+    comentario: z.string().optional(),
+    user: z.object({
+      id: z.string().uuid(),
+      nome: z.string().min(1, "Nome do usuário é obrigatório"),
+      imagem: z.string().optional()
+    }).optional()
+  })).optional(),
+  userId: z.string().uuid().min(1, "ID do usuário é obrigatório"),
+  categoria: z.object({
+    id: z.string().uuid(),
+    nome: z.string().min(1, "Nome da categoria é obrigatório"),
+    cor: z.string().min(1, "Cor da categoria é obrigatória"),
+  }),
+  favoritos: z.array(z.object({
+    id: z.string().uuid(),
+    user: z.object({
+      id: z.string().uuid(),
+      nome: z.string().min(1, "Nome do usuário é obrigatório"),
+      imagem: z.string().optional()
+    }).optional()
+  }))
+
+});
 async function main() {
   //SOFT DELETE MIDDLEWARE 
   prisma.$use(async (params, next) => {
