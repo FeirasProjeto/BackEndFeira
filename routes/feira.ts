@@ -352,6 +352,13 @@ router.post("/", async (req, res) => {
         data: { data: new Date(data) },
       });
 
+      const categorias = await prisma.categoria.findFirst({
+        where: { id: categoria },
+      });
+      if (!categoria) {
+        return res.status(404).json({ message: "Categoria não encontrada" });
+      }
+      
       const categoriaFeira = await prisma.categoriaFeira.create({
         data: {
           feiraId: feira.id,
