@@ -359,12 +359,16 @@ router.post("/", async (req, res) => {
         return res.status(404).json({ message: "Categoria não encontrada" });
       }
       
+      if (!categorias) {
+        return res.status(404).json({ message: "Categoria não encontrada" });
+      } else {
       const categoriaFeira = await prisma.categoriaFeira.create({
         data: {
           feiraId: feira.id,
-          categoriaId: categoria.id,
+          categoriaId: categorias.id,
         },
       });
+      }
       res.status(201).json(feiraDia);
     }
 
