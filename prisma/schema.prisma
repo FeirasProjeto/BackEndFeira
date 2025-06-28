@@ -42,13 +42,6 @@ model Favorito {
   @@map("favoritos")
 }
 
-model Tag {
-  id     Int     @id @default(autoincrement())
-  nome   String
-  feiras FeiraTag[]
-  categoria String 
-}
-
 model Feira {
   id            String           @id @default(uuid()) @db.VarChar(36)
   createdAt     DateTime         @default(now())
@@ -71,9 +64,7 @@ model Feira {
   favoritos     Favorito[]
   diaSemana     DiaSemanaFeira[]
   Avaliacoes    Avaliacao[]
-  categoria     Categoria?   @relation(fields: [categoriaId], references: [id])
-  categoriaId   Int?
-  CategoriaFeira CategoriaFeira[]
+  categoria CategoriaFeira[]
 }
 
 model DiaSemana {
@@ -92,6 +83,13 @@ model DiaSemanaFeira {
 
   @@id([diaSemanaId, feiraId])
   @@map("diaSemanaFeira")
+}
+
+model Tag {
+  id     Int     @id @default(autoincrement())
+  nome   String
+  feiras FeiraTag[]
+  categoria String 
 }
 
 model FeiraTag {
@@ -121,10 +119,9 @@ model Categoria {
   id     Int     @id @default(autoincrement())
   nome   String
   cor    String
-  feiras Feira[]
+  feiras CategoriaFeira[]
 
   @@map("categorias")
-  CategoriaFeira CategoriaFeira[]
 }
 
 model CategoriaFeira {
