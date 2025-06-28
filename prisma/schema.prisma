@@ -64,7 +64,7 @@ model Feira {
   favoritos     Favorito[]
   diaSemana     DiaSemanaFeira[]
   Avaliacoes    Avaliacao[]
-  categoria CategoriaFeira[]
+  categoria     CategoriaFeira[]
 }
 
 model DiaSemana {
@@ -86,10 +86,10 @@ model DiaSemanaFeira {
 }
 
 model Tag {
-  id     Int     @id @default(autoincrement())
-  nome   String
-  feiras FeiraTag[]
-  categoria String 
+  id        Int        @id @default(autoincrement())
+  nome      String
+  feiras    FeiraTag[]
+  categoria String
 }
 
 model FeiraTag {
@@ -116,7 +116,7 @@ model Avaliacao {
 }
 
 model Categoria {
-  id     Int     @id @default(autoincrement())
+  id     Int              @id @default(autoincrement())
   nome   String
   cor    String
   feiras CategoriaFeira[]
@@ -126,10 +126,10 @@ model Categoria {
 
 model CategoriaFeira {
   categoriaId Int
-  feiraId     String 
+  feiraId     String
   feira       Feira     @relation(fields: [feiraId], references: [id])
   categoria   Categoria @relation(fields: [categoriaId], references: [id])
-  
+
   @@id([categoriaId, feiraId])
   @@map("categoriaFeira")
 }

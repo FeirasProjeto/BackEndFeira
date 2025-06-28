@@ -125,6 +125,17 @@ router.get("/", async (req, res) => {
           },
         },
       },
+      categoria: {
+        select: {
+          categoria: {
+            select: {
+              id: true,
+              nome: true,
+              cor: true,
+            },
+          },
+        },
+      }
     },
   });
 
@@ -233,6 +244,17 @@ router.get("/filtros", async (req, res) => {
           },
         },
       },
+      categoria: {
+        select: {
+          categoria: {
+            select: {
+              id: true,
+              nome: true,
+              cor: true,
+            },
+          },
+        },
+      }
     },
   });
   if (feiras.length > 0) {
@@ -247,7 +269,121 @@ router.get("/usuario/:userId", async (req, res) => {
   const { userId } = req.params;
   const feiras = await prisma.feira.findMany({
     where: { userId: userId, deleted: false },
+    include: {
+      _count: {
+        select: {
+          favoritos: true,
+          Avaliacoes: true,
+        },
+      },
+      tags: {
+        select: {
+          tag: {
+            select: {
+              id: true,
+              nome: true,
+            },
+          },
+        },
+      },
+      diaSemana: {
+        select: {
+          diaSemana: true,
+        },
+      },
+      Avaliacoes: {
+        select: {
+          id: true,
+          nota: true,
+          comentario: true,
+          user: {
+            select: {
+              id: true,
+              nome: true,
+              imagem: true,
+            },
+          },
+        },
+      },
+      categoria: {
+        select: {
+          categoria: {
+            select: {
+              id: true,
+              nome: true,
+              cor: true,
+            },
+          },
+        },
+      }
+    }
   });
+  res.status(200).json(feiras);
+});
+
+// get feiras favoritadas pelo usuário
+router.get("/favoritas/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  const feiras = await prisma.feira.findMany({
+    where: {
+      favoritos: {
+        some: {
+          userId: userId,
+        },
+      },
+      deleted: false,
+    },
+    include: {
+      _count: {
+        select: {
+          favoritos: true,
+          Avaliacoes: true,
+        },
+      },
+      tags: {
+        select: {
+          tag: {
+            select: {
+              id: true,
+              nome: true,
+            },
+          },
+        },
+      },
+      diaSemana: {
+        select: {
+          diaSemana: true,
+        },
+      },
+      Avaliacoes: {
+        select: {
+          id: true,
+          nota: true,
+          comentario: true,
+          user: {
+            select: {
+              id: true,
+              nome: true,
+              imagem: true,
+            },
+          },
+        },
+      },
+      categoria: {
+        select: {
+          categoria: {
+            select: {
+              id: true,
+              nome: true,
+              cor: true,
+            },
+          },
+        },
+      }
+    },
+  });
+
   res.status(200).json(feiras);
 });
 
@@ -293,6 +429,17 @@ router.get("/:id", async (req, res) => {
           },
         },
       },
+      categoria: {
+        select: {
+          categoria: {
+            select: {
+              id: true,
+              nome: true,
+              cor: true,
+            },
+          },
+        },
+      }
     },
   });
   res.status(200).json(feira);
@@ -335,20 +482,20 @@ router.post("/", async (req, res) => {
         campoFaltante: !nome
           ? "nome"
           : !endereco
-          ? "endereco"
-          : !numero
-          ? "numero"
-          : !cidade
-          ? "cidade"
-          : !coordenada
-          ? "coordenada"
-          : !horarioInicio
-          ? "horarioInicio"
-          : !horarioFim
-          ? "horarioFim"
-          : !userId
-          ? "userId"
-          : "",
+            ? "endereco"
+            : !numero
+              ? "numero"
+              : !cidade
+                ? "cidade"
+                : !coordenada
+                  ? "coordenada"
+                  : !horarioInicio
+                    ? "horarioInicio"
+                    : !horarioFim
+                      ? "horarioFim"
+                      : !userId
+                        ? "userId"
+                        : "",
       });
   }
 
@@ -424,9 +571,7 @@ router.post("/", async (req, res) => {
         where: { nome: dia },
       });
       if (!diaSemana) {
-        return res
-          .status(404)
-          .json({ message: `Dia da semana ${dia} não encontrado` });
+        return res.status(404).json({ message: `Dia da semana ${dia} não encontrado` });
       }
       const diaSemanaFeira = await prisma.diaSemanaFeira.create({
         data: {
@@ -455,12 +600,17 @@ router.patch("/:id", async (req, res) => {
     numero,
     cidade,
     coordenada,
+    diaSemana,
+    tags,
     horarioInicio,
     horarioFim,
     descricao,
     imagem,
     turno,
+    categoria
   } = req.body;
+
+  console.log(`Atualizando feira com ID: ${id}`);
 
   const feira = await prisma.feira.update({
     where: { id: id },
@@ -477,6 +627,72 @@ router.patch("/:id", async (req, res) => {
       turno,
     },
   });
+
+  if (tags && tags.length > 0) {
+    // Remove tags antigas
+    await prisma.feiraTag.deleteMany({
+      where: { feiraId: id },
+    });
+
+    // Adiciona novas tags
+    for (const tag of tags) {
+      await prisma.feiraTag.create({
+        data: {
+          feiraId: id,
+          tagId: tag.id,
+        },
+      });
+    }
+  }
+
+  if (diaSemana && diaSemana.length > 0) {
+    // Remove dias antigos
+    await prisma.diaSemanaFeira.deleteMany({
+      where: { feiraId: id },
+    });
+
+    // Adiciona novos dias
+    for (const dia of diaSemana) {
+      const diaSemana = await prisma.diaSemana.findFirst({
+        where: { nome: dia },
+      });
+
+      if (!diaSemana) {
+        return res.status(404).json({ message: `Dia da semana ${dia} não encontrado` });
+      }
+
+      const diaSemanaFeira = await prisma.diaSemanaFeira.create({
+        data: {
+          diaSemanaId: diaSemana.id,
+          feiraId: id,
+        }
+      });
+    }
+  }
+
+  if (categoria) {
+    console.log(`Atualizando categoria para a feira ${id} com categoria ${categoria.id}`);
+
+    const categoriaFeira = await prisma.categoriaFeira.findFirst({
+      where: { feiraId: id },
+    });
+
+    if (categoriaFeira) {
+      console.log(`Categoria feira encontrada: ${categoriaFeira.categoriaId}`);
+      await prisma.categoriaFeira.update({
+        where: { categoriaId_feiraId: { categoriaId: categoriaFeira.categoriaId, feiraId: categoriaFeira.feiraId } },
+        data: { categoriaId: categoria },
+      });
+    } else {
+      console.log(`Categoria feira não encontrada, criando nova associação`);
+      await prisma.categoriaFeira.create({
+        data: {
+          feiraId: id,
+          categoriaId: categoria,
+        },
+      });
+    }
+  }
   res.status(200).json(feira);
 });
 
@@ -491,13 +707,3 @@ router.delete("/:id", async (req, res) => {
 });
 
 export default router;
-
-// Delete
-router.delete("/delete/:id", async (req, res) => {
-  const { id } = req.params;
-
-  const feira = await prisma.feira.delete({
-    where: { id: id },
-  });
-  res.status(200).json(feira);
-});
