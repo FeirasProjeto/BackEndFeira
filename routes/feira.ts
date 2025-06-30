@@ -653,6 +653,38 @@ router.post("/", async (req, res) => {
 });
 
 // Update
+// Deleta feiras expiradas
+// Rota já está automatizada para rodar diariamente à meia-noite
+// Mas pode ser chamada manualmente se necessário
+router.patch("/deletar-expiradas", async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to beginning of day
+    
+    const result = await prisma.feira.updateMany({
+      where: {
+        data: {
+          lt: today
+        },
+        deleted: false
+      },
+      data: {
+        deleted: true
+      }
+    });
+    
+    res.status(200).json({ 
+      message: `${result.count} feiras marcadas como excluídas`,
+      count: result.count,
+      data: result
+    });
+  } catch (error) {
+    console.error("Erro ao excluir feiras expiradas:", error);
+    res.status(500).json({ message: "Erro ao processar a solicitação" });
+  }
+});
+
+// Atualiza feira
 router.patch("/:id", async (req, res) => {
   const { id } = req.params;
   const {

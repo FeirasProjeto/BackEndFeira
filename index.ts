@@ -13,6 +13,7 @@ import loginRoutes from './routes/login';
 import altSenhaRoutes from './routes/altSenha';
 import avaliacaoRoutes from './routes/avaliacao';
 import categoriaRoutes from './routes/categoria';
+import { setupCleanupTasks } from './uteis/scheduleTasks';
 
 const app = express();
 const port = process.env.PORT ?? 3000;
@@ -48,6 +49,9 @@ app.get('/', (req, res) => {
     endpoints: ['/usuario', '/feira', '/login']  // Lista de endpoints
   });
 });
+
+// Configuração de tarefas agendadas
+setupCleanupTasks();
 
 // Inicia o servidor
 app.listen(port, () => {
