@@ -87,6 +87,8 @@ main();
 // CRUD
 // Read
 router.get("/", async (req, res) => {
+  const { userId } = req.query;
+
   const feiras = await prisma.feira.findMany({
     where: { deleted: false },
     include: {
@@ -139,7 +141,66 @@ router.get("/", async (req, res) => {
     },
   });
 
-  res.status(200).json(feiras);
+  const feirasFavoritas = await prisma.feira.findMany({
+    where: {
+      favoritos: {
+        some: {
+          userId: userId as string,
+        },
+      },
+      deleted: false,
+    },
+    include: {
+      _count: {
+        select: {
+          favoritos: true,
+          Avaliacoes: true,
+        },
+      },
+      tags: {
+        select: {
+          tag: {
+            select: {
+              id: true,
+              nome: true,
+            },
+          },
+        },
+      },
+      diaSemana: {
+        select: {
+          diaSemana: true,
+        },
+      },
+      Avaliacoes: {
+        select: {
+          id: true,
+          nota: true,
+          comentario: true,
+          user: {
+            select: {
+              id: true,
+              nome: true,
+              imagem: true,
+            },
+          },
+        },
+      },
+      categoria: {
+        select: {
+          categoria: {
+            select: {
+              id: true,
+              nome: true,
+              cor: true,
+            },
+          },
+        },
+      }
+    },
+  });
+
+  res.status(200).json({ feiras, feirasFavoritas });
 });
 
 // filtros
