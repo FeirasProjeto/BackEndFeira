@@ -24,12 +24,25 @@ router.post("/", async (req, res) => {
 
 
 // Delete
-router.delete("/:id", async (req, res) => {
-  const { id } = req.params
+router.delete("/", async (req, res) => {
+  const { userId, feiraId } = req.body
 
-  const favorito = await prisma.favorito.delete({
-    where: { id: id }
+  const favorito = await prisma.favorito.findFirst({
+    where: {
+      userId: userId,
+      feiraId: feiraId
+    }
   })
+
+  if (!favorito) {
+    return res.status(404).json({ message: "Favorito não encontrado" })
+  }
+  await prisma.favorito.delete({
+    where: {
+      id: favorito.id
+    }
+  })
+  
   res.status(200).json(favorito)
 })
 
