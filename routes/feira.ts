@@ -804,7 +804,7 @@ router.patch("/:id", async (req, res) => {
 router.delete("/deletar-todas", async (req, res) => {
   const feiras = await prisma.feira.deleteMany(
     {
-      where: { deleted: false }
+      where: { deleted: true }
     }
   );
 

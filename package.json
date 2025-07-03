@@ -1,11 +1,11 @@
 {
-  "name": "minhaFeira",
+  "name": "minhafeira",
   "version": "1.0.0",
   "description": "",
   "main": "index.ts",
   "scripts": {
     "dev": "npx ts-node-dev --respawn index.ts",
-    "vercel-build": "npx prisma migrate deploy",
+    "vercel-build": "npx prisma db push",
     "postinstall": "npx prisma generate"
   },
   "keywords": [],
