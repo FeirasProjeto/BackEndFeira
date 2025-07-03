@@ -75,14 +75,20 @@ async function main() {
   //SOFT DELETE MIDDLEWARE
   prisma.$use(async (params, next) => {
     // Check incoming query type
-    if (params.model == "Feira") {
-      if (params.action == "delete") {
+    if (params.model == "Feira" && params.action == "delete") {
         // Delete queries
         // Change action to an update
-        params.action = "update";
-        params.args["data"] = { deleted: true };
+        const bypassSoftDelete = params.args?.bypassSoftDelete;
+
+        if (bypassSoftDelete) {
+          // If bypassSoftDelete is true, delete the record permanently
+          params.action = "delete";
+        } else {
+          params.action = "update";
+          params.args["data"] = { deleted: true };
+        }
       }
-    }
+    
     return next(params);
   });
 }
@@ -204,7 +210,7 @@ router.get("/", async (req, res) => {
     },
   });
 
-  res.status(200).json({ feiras, feirasFavoritas });
+  res.status(200).json({quantidade: feiras.length, feiras, feirasFavoritas });
 });
 
 // filtros
@@ -794,19 +800,13 @@ router.patch("/:id", async (req, res) => {
   res.status(200).json(feira);
 });
 
-// Delete
-router.delete("/:id", async (req, res) => {
-  const { id } = req.params;
-
-  const feira = await prisma.feira.delete({
-    where: { id: id },
-  });
-  res.status(200).json(feira);
-});
-
 //Delete todas as feiras
 router.delete("/deletar-todas", async (req, res) => {
-  const feiras = await prisma.feira.deleteMany();
+  const feiras = await prisma.feira.deleteMany(
+    {
+      where: { deleted: false }
+    }
+  );
 
   if (feiras.count === 0) {
     return res.status(404).json({ message: "Nenhuma feira encontrada" });
@@ -825,5 +825,25 @@ router.delete("/deletar-todas", async (req, res) => {
   }
 });
 
+// Delete feira específica permanentemente
+router.delete("/:id/permanente", async (req, res) => {
+  const { id } = req.params;
+
+  const feira = await prisma.feira.delete({
+    where: { id: id },
+    bypassSoftDelete: true
+  } as any);
+  res.status(200).json(feira);
+});
+
+// Delete feira específica
+router.delete("/:id", async (req, res) => {
+  const { id } = req.params;
+
+  const feira = await prisma.feira.delete({
+    where: { id: id },
+  });
+  res.status(200).json(feira);
+});
 
 export default router;

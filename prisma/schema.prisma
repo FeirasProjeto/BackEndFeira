@@ -36,8 +36,8 @@ model Favorito {
   id      String @id @default(uuid()) @db.VarChar(36)
   userId  String
   feiraId String
-  feira   Feira  @relation(fields: [feiraId], references: [id])
-  user    User   @relation(fields: [userId], references: [id])
+  feira   Feira  @relation(fields: [feiraId], references: [id], onDelete: Cascade)
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("favoritos")
 }
@@ -59,7 +59,7 @@ model Feira {
   imagem        String?          @default("https://i.imgur.com/4Y0v1xk.png") @db.Text
   avaliacao     Float?           @default(0)
   tags          FeiraTag[]
-  user          User             @relation(fields: [userId], references: [id])
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId        String
   favoritos     Favorito[]
   diaSemana     DiaSemanaFeira[]
@@ -78,8 +78,8 @@ model DiaSemana {
 model DiaSemanaFeira {
   diaSemanaId String
   feiraId     String
-  feira       Feira     @relation(fields: [feiraId], references: [id])
-  diaSemana   DiaSemana @relation(fields: [diaSemanaId], references: [id])
+  feira       Feira     @relation(fields: [feiraId], references: [id], onDelete: Cascade)
+  diaSemana   DiaSemana @relation(fields: [diaSemanaId], references: [id], onDelete: Cascade)
 
   @@id([diaSemanaId, feiraId])
   @@map("diaSemanaFeira")
@@ -95,8 +95,8 @@ model Tag {
 model FeiraTag {
   tagId   Int
   feiraId String
-  tag     Tag    @relation(fields: [tagId], references: [id])
-  feira   Feira  @relation(fields: [feiraId], references: [id])
+  tag     Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  feira   Feira  @relation(fields: [feiraId], references: [id], onDelete: Cascade)
 
   @@id([tagId, feiraId])
   @@map("feiraTag")
@@ -108,9 +108,9 @@ model Avaliacao {
   nota       Int
   comentario String?  @db.VarChar(400)
   feiraId    String
-  feira      Feira    @relation(fields: [feiraId], references: [id])
+  feira      Feira    @relation(fields: [feiraId], references: [id], onDelete: Cascade)
   userId     String
-  user       User     @relation(fields: [userId], references: [id])
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("avaliacoes")
 }
@@ -127,8 +127,8 @@ model Categoria {
 model CategoriaFeira {
   categoriaId Int
   feiraId     String
-  feira       Feira     @relation(fields: [feiraId], references: [id])
-  categoria   Categoria @relation(fields: [categoriaId], references: [id])
+  feira       Feira     @relation(fields: [feiraId], references: [id], onDelete: Cascade)
+  categoria   Categoria @relation(fields: [categoriaId], references: [id], onDelete: Cascade)
 
   @@id([categoriaId, feiraId])
   @@map("categoriaFeira")
