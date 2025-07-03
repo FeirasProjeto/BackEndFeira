@@ -1,9 +1,12 @@
 import { PrismaClient } from "@prisma/client";
 import { Router } from "express";
 import { z } from "zod";
+import multer from "multer"
 
 const prisma = new PrismaClient();
 const router = Router();
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 const feiraSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
@@ -507,7 +510,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // Create
-router.post("/", async (req, res) => {
+router.post("/", upload.single("imagem"), async (req, res) => {
   const {
     nome,
     endereco,
@@ -518,12 +521,13 @@ router.post("/", async (req, res) => {
     horarioFim,
     data,
     descricao,
-    imagem,
     tags,
     diaSemana,
     userId,
     categoria,
   } = req.body;
+
+  const imagem = req.file?.buffer.toString("base64") || null;
 
   if (
     !nome ||
@@ -600,7 +604,7 @@ router.post("/", async (req, res) => {
     },
   });
 
-  if (tags.length > 0) {
+  if (tags && tags.length > 0) {
     for (const tag of tags) {
       const feiraTag = await prisma.feiraTag.create({
         data: {
@@ -612,7 +616,7 @@ router.post("/", async (req, res) => {
   }
 
   const categorias = await prisma.categoria.findFirst({
-    where: { id: categoria },
+    where: { id: Number(categoria) },
   });
 
   if (!categorias) {
@@ -626,7 +630,7 @@ router.post("/", async (req, res) => {
     });
   }
 
-  if (diaSemana.length > 0) {
+  if (diaSemana && diaSemana.length > 0) {
     for (const dia of diaSemana) {
       const diaSemana = await prisma.diaSemana.findFirst({
         where: { nome: dia },
