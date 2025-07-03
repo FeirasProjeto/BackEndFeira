@@ -69,30 +69,8 @@ const feiraSchema = z.object({
         .optional(),
     })
   ),
-  
-});
-async function main() {
-  //SOFT DELETE MIDDLEWARE
-  prisma.$use(async (params, next) => {
-    // Check incoming query type
-    if (params.model == "Feira" && params.action == "delete") {
-        // Delete queries
-        // Change action to an update
-        const bypassSoftDelete = params.args?.bypassSoftDelete;
 
-        if (bypassSoftDelete) {
-          // If bypassSoftDelete is true, delete the record permanently
-          params.action = "delete";
-        } else {
-          params.action = "update";
-          params.args["data"] = { deleted: true };
-        }
-      }
-    
-    return next(params);
-  });
-}
-main();
+});
 
 // CRUD
 // Read
@@ -210,7 +188,7 @@ router.get("/", async (req, res) => {
     },
   });
 
-  res.status(200).json({quantidade: feiras.length, feiras, feirasFavoritas });
+  res.status(200).json({ quantidade: feiras.length, feiras, feirasFavoritas });
 });
 
 // filtros
@@ -528,13 +506,15 @@ router.post("/", upload.single("imagem"), async (req, res) => {
     horarioFim,
     data,
     descricao,
-    tags,
-    diaSemana,
     userId,
     categoria,
   } = req.body;
 
+
   const imagem = req.file?.buffer.toString("base64") || null;
+
+  const tags = JSON.parse(req.body.tags) || [];
+  const diaSemana = JSON.parse(req.body.diaSemana) || [];
 
   if (
     !nome ||
@@ -568,6 +548,7 @@ router.post("/", upload.single("imagem"), async (req, res) => {
                       : !userId
                         ? "userId"
                         : "",
+        categoria: !categoria ? "categoria" : "",
       });
   }
 
@@ -612,11 +593,26 @@ router.post("/", upload.single("imagem"), async (req, res) => {
   });
 
   if (tags && tags.length > 0) {
+    console.log(`Adicionando tags para a feira ${feira.id}:`, tags);
+    
     for (const tag of tags) {
+      console.log(`Verificando se a tag ${tag} existe...`);
+      
+      const tagExists = await prisma.tag.findFirst({
+        where: { nome: tag },
+      });
+
+      if (!tagExists) {
+        const deletaFeira = await prisma.feira.delete({
+          where: { id: feira.id },
+        })
+        return res.status(404).json({ message: `Tag com ID ${tag} não encontrada` });
+      }
+
       const feiraTag = await prisma.feiraTag.create({
         data: {
           feiraId: feira.id,
-          tagId: tag.id,
+          tagId: tagExists.id,
         },
       });
     }
@@ -627,6 +623,9 @@ router.post("/", upload.single("imagem"), async (req, res) => {
   });
 
   if (!categorias) {
+    const deletaFeira = await prisma.feira.delete({
+      where: { id: feira.id },
+    });
     return res.status(404).json({ message: "Categoria não encontrada" });
   } else {
     const categoriaFeira = await prisma.categoriaFeira.create({
@@ -643,6 +642,9 @@ router.post("/", upload.single("imagem"), async (req, res) => {
         where: { nome: dia },
       });
       if (!diaSemana) {
+        const deletaFeira = await prisma.feira.delete({
+          where: { id: feira.id },
+        });
         return res.status(404).json({ message: `Dia da semana ${dia} não encontrado` });
       }
       const diaSemanaFeira = await prisma.diaSemanaFeira.create({
@@ -671,7 +673,7 @@ router.patch("/deletar-expiradas", async (req, res) => {
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Set to beginning of day
-    
+
     const result = await prisma.feira.updateMany({
       where: {
         data: {
@@ -683,8 +685,8 @@ router.patch("/deletar-expiradas", async (req, res) => {
         deleted: true
       }
     });
-    
-    res.status(200).json({ 
+
+    res.status(200).json({
       message: `${result.count} feiras marcadas como excluídas`,
       count: result.count,
       data: result
@@ -810,7 +812,7 @@ router.delete("/deletar-todas", async (req, res) => {
 
   if (feiras.count === 0) {
     return res.status(404).json({ message: "Nenhuma feira encontrada" });
-  } 
+  }
   if (feiras.count > 0) {
     return res.status(200).json({ message: "Todas as feiras deletadas com sucesso!", count: feiras.count, data: feiras });
   }
@@ -831,8 +833,7 @@ router.delete("/:id/permanente", async (req, res) => {
 
   const feira = await prisma.feira.delete({
     where: { id: id },
-    bypassSoftDelete: true
-  } as any);
+  });
   res.status(200).json(feira);
 });
 
@@ -840,8 +841,9 @@ router.delete("/:id/permanente", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
 
-  const feira = await prisma.feira.delete({
+  const feira = await prisma.feira.update({
     where: { id: id },
+    data: { deleted: true }
   });
   res.status(200).json(feira);
 });
