@@ -77,6 +77,8 @@ const feiraSchema = z.object({
 router.get("/", async (req, res) => {
   const { userId } = req.query;
 
+  console.log(`Buscando feiras com userId: ${userId}`);
+  
   const feiras = await prisma.feira.findMany({
     where: { deleted: false },
     include: {
@@ -129,6 +131,9 @@ router.get("/", async (req, res) => {
     },
   });
 
+  console.log(`Feiras encontradas: ${feiras.length}`);
+  
+    console.log(`Buscando feiras favoritas para userId: ${userId}`);
   const feirasFavoritas = await prisma.feira.findMany({
     where: {
       favoritos: {
@@ -187,7 +192,8 @@ router.get("/", async (req, res) => {
       }
     },
   });
-
+  console.log(`Feiras favoritas encontradas: ${feirasFavoritas.length}`);
+  
   res.status(200).json({ quantidade: feiras.length, feiras, feirasFavoritas });
 });
 
@@ -195,6 +201,7 @@ router.get("/", async (req, res) => {
 router.get("/filtros", async (req, res) => {
   const { tags, diaSemana, horario, pesquisa } = req.query;
 
+  console.log(`Buscando feiras com filtros: ${JSON.stringify(req.query)}`);
   const filters: any = {
     deleted: false,
     nome: {
@@ -316,6 +323,8 @@ router.get("/filtros", async (req, res) => {
 // Get feiras do usuário
 router.get("/usuario/:userId", async (req, res) => {
   const { userId } = req.params;
+
+  console.log(`Buscando feiras do usuário com userId: ${userId}`);
   const feiras = await prisma.feira.findMany({
     where: { userId: userId, deleted: false },
     include: {
@@ -374,6 +383,7 @@ router.get("/usuario/:userId", async (req, res) => {
 router.get("/favoritas/:userId", async (req, res) => {
   const { userId } = req.params;
 
+  console.log(`Buscando feiras favoritadas pelo usuário com userId: ${userId}`);
   const feiras = await prisma.feira.findMany({
     where: {
       favoritos: {
@@ -440,6 +450,7 @@ router.get("/favoritas/:userId", async (req, res) => {
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
 
+  console.log(`Buscando feira com ID: ${id}`);
   const feira = await prisma.feira.findUnique({
     where: { id: id, deleted: false },
     include: {
@@ -510,11 +521,14 @@ router.post("/", upload.single("imagem"), async (req, res) => {
     categoria,
   } = req.body;
 
+console.log(`Dados recebidos: ${JSON.stringify(req.body)}`);
 
   const imagem = req.file?.buffer.toString("base64") || null;
 
   const tags = JSON.parse(req.body.tags) || [];
   const diaSemana = JSON.parse(req.body.diaSemana) || [];
+  console.log(`Tags recebidas: ${JSON.stringify(tags)}`);
+  console.log(`Dias da semana recebidos: ${JSON.stringify(diaSemana)}`);
 
   if (
     !nome ||
@@ -527,9 +541,8 @@ router.post("/", upload.single("imagem"), async (req, res) => {
     !userId ||
     !categoria
   ) {
-    return res
-      .status(400)
-      .json({
+    console.log("Campos obrigatórios não preenchidos");
+    return res.status(400).json({
         message: "Todos os campos devem ser preenchidos",
         campoFaltante: !nome
           ? "nome"
@@ -552,6 +565,7 @@ router.post("/", upload.single("imagem"), async (req, res) => {
       });
   }
 
+  console.log(`Verificando horários: Início - ${horarioInicio}, Fim - ${horarioFim}`);
   let turno = "";
   try {
     if (horarioInicio && horarioFim) {
@@ -573,9 +587,13 @@ router.post("/", upload.single("imagem"), async (req, res) => {
       }
     }
   } catch (error) {
+    console.error("Erro ao verificar horários:", error);
     return res.status(400).json({ message: "Horário inválido" });
   }
 
+  console.log(`Turno determinado: ${turno}`);
+  console.log("Criando nova feira");
+  
   const feira = await prisma.feira.create({
     data: {
       nome,
@@ -592,6 +610,8 @@ router.post("/", upload.single("imagem"), async (req, res) => {
     },
   });
 
+  console.log(`Feira criada com ID: ${feira.id}`);
+  
   if (tags && tags.length > 0) {
     console.log(`Adicionando tags para a feira ${feira.id}:`, tags);
     
@@ -617,6 +637,8 @@ router.post("/", upload.single("imagem"), async (req, res) => {
       });
     }
   }
+
+  console.log("Adicionando categoria para a feira");
 
   const categorias = await prisma.categoria.findFirst({
     where: { id: Number(categoria) },
