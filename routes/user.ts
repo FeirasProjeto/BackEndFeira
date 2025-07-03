@@ -36,7 +36,10 @@ router.get("/", async (req, res) => {
       }
     }
   )
-  res.status(200).json(users)
+  res.status(200).json({ message: "Usuários encontrados:", users })
+  res.status(404).json({ message: "Usuários não encontrados" })
+  res.status(500).json({ message: "Erro interno do servidor" })
+  res.status(400).json({ message: "Erro ao buscar usuários" })
 })
 
 router.get("/:id", async (req, res) => {
@@ -55,7 +58,9 @@ router.get("/:id", async (req, res) => {
       _count: { select: { favoritos: true } }
     }
   })
-  res.status(200).json(user)
+  res.status(200).json({ message: "Usuário encontrado", user })
+  res.status(404).json({ message: "Usuário não encontrado" })
+  res.status(500).json({ message: "Erro interno do servidor" })
 })
 
 // Create com imagem
@@ -146,9 +151,9 @@ router.delete("/:id", async (req, res) => {
   res.status(200).json({ message: "Usuário deletado com sucesso!", user 
   })
   res.status(400).json({ message: "Erro ao deletar usuário" })
-
+  res.status(404).json({ message: "Usuário não encontrado" })
+  res.status(500).json({ message: "Erro interno do servidor" })
 })
-
 
 
 export default router
