@@ -69,6 +69,7 @@ const feiraSchema = z.object({
         .optional(),
     })
   ),
+  
 });
 async function main() {
   //SOFT DELETE MIDDLEWARE
@@ -802,5 +803,27 @@ router.delete("/:id", async (req, res) => {
   });
   res.status(200).json(feira);
 });
+
+//Delete todas as feiras
+router.delete("/deletar-todas", async (req, res) => {
+  const feiras = await prisma.feira.deleteMany();
+
+  if (feiras.count === 0) {
+    return res.status(404).json({ message: "Nenhuma feira encontrada" });
+  } 
+  if (feiras.count > 0) {
+    return res.status(200).json({ message: "Todas as feiras deletadas com sucesso!", count: feiras.count, data: feiras });
+  }
+  if (feiras.count < 0) {
+    return res.status(400).json({ message: "Erro ao deletar feiras" });
+  }
+  if (feiras.count === undefined) {
+    return res.status(500).json({ message: "Erro interno do servidor" });
+  }
+  if (feiras.count === null) {
+    return res.status(504).json({ message: "Tempo limite de solicitação excedido" });
+  }
+});
+
 
 export default router;
