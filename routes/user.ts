@@ -37,9 +37,6 @@ router.get("/", async (req, res) => {
     }
   )
   res.status(200).json({ message: "Usuários encontrados:", users })
-  res.status(404).json({ message: "Usuários não encontrados" })
-  res.status(500).json({ message: "Erro interno do servidor" })
-  res.status(400).json({ message: "Erro ao buscar usuários" })
 })
 
 router.get("/:id", async (req, res) => {
@@ -59,8 +56,6 @@ router.get("/:id", async (req, res) => {
     }
   })
   res.status(200).json({ message: "Usuário encontrado", user })
-  res.status(404).json({ message: "Usuário não encontrado" })
-  res.status(500).json({ message: "Erro interno do servidor" })
 })
 
 // Create com imagem
@@ -77,8 +72,7 @@ router.post("/", upload.single("imagem"), async (req, res) => {
     if (
       !nome ||
       !email ||
-      !senha ||
-      !telefone
+      !senha
     )
     {
       res.status(400)
@@ -88,13 +82,7 @@ router.post("/", upload.single("imagem"), async (req, res) => {
         ? "nome" : !email ? "email" : !senha ? "senha" : "telefone"
       });
     }
-    // Verifica se a imagem foi enviada
-    if (!imagem) {
-      res.status(400).json({ erro: "Imagem nao enviada" })
-      return
-    }
     
-
   const erros = validaSenha(senha)
   if (erros.length > 0) {
     res.status(400).json({ erro: erros.join("; ") })

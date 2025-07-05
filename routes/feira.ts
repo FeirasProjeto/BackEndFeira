@@ -94,6 +94,7 @@ router.get("/", async (req, res) => {
             select: {
               id: true,
               nome: true,
+              categoria: true
             },
           },
         },
@@ -156,6 +157,7 @@ router.get("/", async (req, res) => {
             select: {
               id: true,
               nome: true,
+              categoria: true
             },
           },
         },
@@ -277,6 +279,7 @@ router.get("/filtros", async (req, res) => {
             select: {
               id: true,
               nome: true,
+              categoria: true
             },
           },
         },
@@ -340,6 +343,7 @@ router.get("/usuario/:userId", async (req, res) => {
             select: {
               id: true,
               nome: true,
+              categoria: true
             },
           },
         },
@@ -406,6 +410,7 @@ router.get("/favoritas/:userId", async (req, res) => {
             select: {
               id: true,
               nome: true,
+              categoria: true
             },
           },
         },
@@ -466,6 +471,7 @@ router.get("/:id", async (req, res) => {
             select: {
               id: true,
               nome: true,
+              categoria: true
             },
           },
         },

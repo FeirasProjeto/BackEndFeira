@@ -19,7 +19,7 @@ model User {
   nome       String
   email      String
   senha      String
-  imagem     String?
+  imagem     String?     @default("https://imgur.com/hSeW4CV.jpeg")
   bloqueado  Boolean     @default(false)
   token      String?
   tentativas Int         @default(0)
