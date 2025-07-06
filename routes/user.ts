@@ -60,29 +60,28 @@ router.get("/:id", async (req, res) => {
 
 // Create com imagem
 router.post("/", upload.single("imagem"), async (req, res) => {
-  const { 
-    nome, 
-    email, 
-    senha, 
-    telefone 
+  const {
+    nome,
+    email,
+    senha,
+    telefone
   } = req.body
 
-    const imagem = req.file?.buffer.toString("base64") || null;
-    
-    if (
-      !nome ||
-      !email ||
-      !senha
-    )
-    {
-      res.status(400)
+  const imagem = req.file?.buffer.toString("base64") || null;
+
+  if (
+    !nome ||
+    !email ||
+    !senha
+  ) {
+    res.status(400)
       .json({
         message: "Todos os campos devem ser preenchidos",
-        campoFaltante: !nome 
-        ? "nome" : !email ? "email" : !senha ? "senha" : "telefone"
+        campoFaltante: !nome
+          ? "nome" : !email ? "email" : !senha ? "senha" : "telefone"
       });
-    }
-    
+  }
+
   const erros = validaSenha(senha)
   if (erros.length > 0) {
     res.status(400).json({ erro: erros.join("; ") })
@@ -118,13 +117,15 @@ router.post("/", upload.single("imagem"), async (req, res) => {
   res.status(201).json({ message: "Usuário criado com sucesso!" })
 })
 // Update
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", upload.single("imagem"), async (req, res) => {
   const { id } = req.params
   const { nome, email, telefone } = req.body
 
+  const imagem = req.file?.buffer.toString("base64") || null;
+
   const user = await prisma.user.update({
     where: { id: id },
-    data: { nome, email, telefone }
+    data: { nome, email, telefone, imagem }
   })
   res.status(200).json(user)
 })
@@ -136,7 +137,8 @@ router.delete("/:id", async (req, res) => {
   const user = await prisma.user.delete({
     where: { id: id }
   })
-  res.status(200).json({ message: "Usuário deletado com sucesso!", user 
+  res.status(200).json({
+    message: "Usuário deletado com sucesso!", user
   })
   res.status(400).json({ message: "Erro ao deletar usuário" })
   res.status(404).json({ message: "Usuário não encontrado" })
