@@ -524,15 +524,21 @@ router.post("/", upload.single("imagem"), async (req, res) => {
     data,
     descricao,
     userId,
-    categoria,
+    categoria
   } = req.body;
+
+  let { tags, diaSemana } = req.body;
 
 console.log(`Dados recebidos: ${JSON.stringify(req.body)}`);
 
   const imagem = req.file?.buffer.toString("base64") || null;
 
-  const tags = JSON.parse(req.body.tags) || [];
-  const diaSemana = JSON.parse(req.body.diaSemana) || [];
+  if (tags) {
+    tags = JSON.parse(tags);
+  }
+  if (diaSemana) {
+    diaSemana = JSON.parse(diaSemana);
+  }
   console.log(`Tags recebidas: ${JSON.stringify(tags)}`);
   console.log(`Dias da semana recebidos: ${JSON.stringify(diaSemana)}`);
 
