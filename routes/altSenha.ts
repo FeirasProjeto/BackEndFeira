@@ -112,7 +112,7 @@ router.post("/:usuarioId", async (req, res) => {
 
         await prisma.user.update({
             where: { id: usuarioId },
-            data: { senha: hash },
+            data: { senha: hash, token: null },
         });
 
         res.status(200).json({ mensagem: "Senha alterada com sucesso" });
