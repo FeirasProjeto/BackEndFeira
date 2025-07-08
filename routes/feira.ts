@@ -732,7 +732,7 @@ router.patch("/deletar-expiradas", async (req, res) => {
 });
 
 // Atualiza feira
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", upload.single("imagem"), async (req, res) => {
   const { id } = req.params;
   const {
     nome,
@@ -745,10 +745,11 @@ router.patch("/:id", async (req, res) => {
     horarioInicio,
     horarioFim,
     descricao,
-    imagem,
     turno,
     categoria
   } = req.body;
+
+  const imagem = req.file?.buffer.toString("base64") || null;
 
   console.log(`Atualizando feira com ID: ${id}`);
 
