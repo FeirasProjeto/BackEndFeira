@@ -638,6 +638,7 @@ console.log(`Dados recebidos: ${JSON.stringify(req.body)}`);
         const deletaFeira = await prisma.feira.delete({
           where: { id: feira.id },
         })
+        console.log(`Tag com nome ${tag} não encontrada, feira ${feira.id} deletada`);
         return res.status(404).json({ message: `Tag com ID ${tag} não encontrada` });
       }
 
@@ -660,6 +661,8 @@ console.log(`Dados recebidos: ${JSON.stringify(req.body)}`);
     const deletaFeira = await prisma.feira.delete({
       where: { id: feira.id },
     });
+
+    console.log(`Feira ${feira.id} deletada devido à categoria não encontrada`);
     return res.status(404).json({ message: "Categoria não encontrada" });
   } else {
     const categoriaFeira = await prisma.categoriaFeira.create({
@@ -679,6 +682,8 @@ console.log(`Dados recebidos: ${JSON.stringify(req.body)}`);
         const deletaFeira = await prisma.feira.delete({
           where: { id: feira.id },
         });
+
+        console.log(`Dia da semana ${dia} não encontrado, feira ${feira.id} deletada`);
         return res.status(404).json({ message: `Dia da semana ${dia} não encontrado` });
       }
       const diaSemanaFeira = await prisma.diaSemanaFeira.create({
@@ -688,6 +693,8 @@ console.log(`Dados recebidos: ${JSON.stringify(req.body)}`);
         },
       });
     }
+
+    console.log(`Dias da semana adicionados para a feira ${feira.id}`);
     res.status(201).json(feira);
   } else {
     const feiraDia = await prisma.feira.update({
@@ -695,6 +702,7 @@ console.log(`Dados recebidos: ${JSON.stringify(req.body)}`);
       data: { data: new Date(data) },
     });
 
+    console.log(`Feira criada sem dias da semana, data definida: ${feiraDia.data}`);
     res.status(201).json(feiraDia);
   }
 });

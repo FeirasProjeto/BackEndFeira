@@ -103,6 +103,8 @@ router.post("/", validate(avaliacaoSchema), async (req, res) => {
   try {
     const { nota, comentario, feiraId, userId } = req.body;
 
+    console.log(`Criando avaliação para usuário ${userId} na feira ${feiraId} com nota ${nota}`);
+    
     const [usuario, feira, avaliacaoExistente] = await Promise.all([
       prisma.user.findUnique({ where: { id: userId } }),
       prisma.feira.findUnique({ where: { id: feiraId } }),
@@ -110,10 +112,12 @@ router.post("/", validate(avaliacaoSchema), async (req, res) => {
     ]);
 
     if (!usuario || !feira) {
+      console.log(`Usuário ou feira não encontrados: userId=${userId}, feiraId=${feiraId}`);
       return res.status(404).json({ error: "Usuário ou feira não encontrados" });
     }
 
     if (avaliacaoExistente) {
+      console.log(`Usuário já avaliou a feira: userId=${userId}, feiraId=${feiraId}`);
       return res.status(400).json({ error: "Usuário já avaliou esta feira" });
     }
 
@@ -126,8 +130,10 @@ router.post("/", validate(avaliacaoSchema), async (req, res) => {
       return avaliacao;
     });
 
+    console.log(`Avaliação criada: ${JSON.stringify(result)}`);
     res.status(201).json(result);
   } catch (error) {
+    console.error("Erro ao criar avaliação:", error);
     res.status(500).json({ error: "Erro ao criar avaliação" });
   }
 });
@@ -137,6 +143,7 @@ router.delete("/:id", validate(idParamsSchema), async (req, res) => {
   try {
     const { id } = req.params;
 
+    console.log(`Deletando avaliação com ID ${id}`);
     const avaliacao = await prisma.avaliacao.findUnique({ where: { id } });
     if (!avaliacao) {
       return res.status(404).json({ error: "Avaliação não encontrada" });
@@ -148,9 +155,11 @@ router.delete("/:id", validate(idParamsSchema), async (req, res) => {
       return deleted;
     });
 
+    console.log(`Avaliação deletada: ${JSON.stringify(result)}`);
     res.status(200).json(result);
   } catch (error) {
-    res.status(500).json({ error: "Erro ao deletar avaliação" });
+    console.error("Erro ao deletar avaliação:", error);
+    res.status(400).json({ error: "Erro ao deletar avaliação" });
   }
 });
 

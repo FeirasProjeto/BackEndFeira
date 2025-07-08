@@ -15,6 +15,7 @@ router.post("/", async (req, res) => {
 
   if (!email || !senha) {
     // res.status(400).json({ erro: "Informe e-mail e senha do usuário" })
+    console.log("Login ou senha incorretos");
     res.status(400).json({ erro: mensaPadrao });
     return;
   }
@@ -26,11 +27,13 @@ router.post("/", async (req, res) => {
 
     if (usuario == null) {
       // res.status(400).json({ erro: "E-mail inválido" })
+      console.log("Erro ao fazer login");
       res.status(400).json({ erro: mensaPadrao });
       return;
     }
     // Verifica se o usuario está bloqueado
     if (usuario.bloqueado == true) {
+      console.log("Usuário bloqueado, altere a sua senha para poder efetuar o login");
       res.status(400).json({ erro: "Usuário bloqueado, altere a sua senha para poder efetuar o login" });
       return;
     }
@@ -46,6 +49,7 @@ router.post("/", async (req, res) => {
         { expiresIn: "1h" }
       );
 
+      console.log(`Usuário logado com sucesso`);
       res.status(200).json({
         id: usuario.id,
         nome: usuario.nome,
@@ -78,10 +82,11 @@ router.post("/", async (req, res) => {
         })
       }
 
-
+      console.log("Login ou senha incorretos");
       res.status(400).json({ erro: mensaPadrao });
     }
   } catch (error) {
+    console.error("Erro ao fazer login:", error);
     res.status(400).json(error);
   }
 });

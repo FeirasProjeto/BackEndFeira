@@ -15,10 +15,12 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   const { userId, feiraId } = req.body
 
-
+  console.log(`Criando favorito para usuário ${userId} e feira ${feiraId}`);
+  
   const favorito = await prisma.favorito.create({
     data: { userId, feiraId }
   })
+  console.log(`Favorito criado: ${JSON.stringify(favorito)}`);
   res.status(201).json(favorito)
 })
 
@@ -27,6 +29,7 @@ router.post("/", async (req, res) => {
 router.delete("/", async (req, res) => {
   const { userId, feiraId } = req.body
 
+  console.log(`Removendo favorito para usuário ${userId} e feira ${feiraId}`);
   const favorito = await prisma.favorito.findFirst({
     where: {
       userId: userId,
@@ -43,6 +46,7 @@ router.delete("/", async (req, res) => {
     }
   })
   
+  console.log(`Favorito removido: ${JSON.stringify(favorito)}`);
   res.status(200).json(favorito)
 })
 

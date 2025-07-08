@@ -82,8 +82,12 @@ router.post("/", upload.single("imagem"), async (req, res) => {
       });
   }
 
+  console.log(`Criando usuário`);
+  
   const erros = validaSenha(senha)
   if (erros.length > 0) {
+    console.log("Senha inválida:", erros);
+    
     res.status(400).json({ erro: erros.join("; ") })
     return
   }
@@ -94,6 +98,7 @@ router.post("/", upload.single("imagem"), async (req, res) => {
   })
 
   if (userCadastrado) {
+    console.log(`E-mail já cadastrado`);
     res.status(400).json({ erro: "E-mail já cadastrado" })
     return
   }
@@ -109,8 +114,10 @@ router.post("/", upload.single("imagem"), async (req, res) => {
     const user = await prisma.user.create({
       data: { nome, email, senha: hash, telefone, imagem }
     })
+    console.log(`Usuário criado`);
     res.status(201).json(user)
   } catch (error) {
+    console.error("Erro ao criar usuário:", error);
     res.status(400).json(error)
   }
 
@@ -123,10 +130,13 @@ router.patch("/:id", upload.single("imagem"), async (req, res) => {
 
   const imagem = req.file?.buffer.toString("base64") || null;
 
+  console.log(`Atualizando usuário ${id}`);
+
   const user = await prisma.user.update({
     where: { id: id },
     data: { nome, email, telefone, imagem }
   })
+  console.log(`Usuário atualizado com sucesso`);
   res.status(200).json(user)
 })
 
@@ -134,15 +144,14 @@ router.patch("/:id", upload.single("imagem"), async (req, res) => {
 router.delete("/:id", async (req, res) => {
   const { id } = req.params
 
+  console.log(`Deletando usuário ${id}`);
+
   const user = await prisma.user.delete({
     where: { id: id }
   })
-  res.status(200).json({
-    message: "Usuário deletado com sucesso!", user
-  })
-  res.status(400).json({ message: "Erro ao deletar usuário" })
-  res.status(404).json({ message: "Usuário não encontrado" })
-  res.status(500).json({ message: "Erro interno do servidor" })
+
+  console.log(`Usuário deletado com sucesso`);
+  res.status(200).json({message: "Usuário deletado com sucesso!", user})
 })
 
 
