@@ -24,7 +24,6 @@ router.post("/", async (req, res) => {
   res.status(201).json(favorito)
 })
 
-
 // Delete
 router.delete("/", async (req, res) => {
   const { userId, feiraId } = req.body
@@ -49,7 +48,5 @@ router.delete("/", async (req, res) => {
   console.log(`Favorito removido: ${JSON.stringify(favorito)}`);
   res.status(200).json(favorito)
 })
-
-
 
 export default router

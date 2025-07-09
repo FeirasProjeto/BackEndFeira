@@ -820,24 +820,24 @@ router.patch("/:id", upload.single("imagem"), async (req, res) => {
   }
 
   if (categoria) {
-    console.log(`Atualizando categoria para a feira ${id} com categoria ${categoria.id}`);
+    console.log(`Atualizando categoria para a feira ${id} com categoria ${categoria}`);
 
     const categoriaFeira = await prisma.categoriaFeira.findFirst({
       where: { feiraId: id },
     });
 
     if (categoriaFeira) {
-      console.log(`Categoria feira encontrada: ${categoriaFeira.categoriaId}`);
+      console.log(`Categoria feira encontrada: ${categoriaFeira}`);
       await prisma.categoriaFeira.update({
         where: { categoriaId_feiraId: { categoriaId: categoriaFeira.categoriaId, feiraId: categoriaFeira.feiraId } },
-        data: { categoriaId: categoria },
+        data: { categoriaId: Number(categoria) },
       });
     } else {
       console.log(`Categoria feira não encontrada, criando nova associação`);
       await prisma.categoriaFeira.create({
         data: {
           feiraId: id,
-          categoriaId: categoria,
+          categoriaId: Number(categoria),
         },
       });
     }
