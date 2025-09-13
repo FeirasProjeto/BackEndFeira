@@ -77,9 +77,17 @@ const feiraSchema = z.object({
 router.get("/", async (req, res) => {
   const { userId } = req.query;
 
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+
+  const skip = (page - 1) * limit;
+
   console.log(`Buscando feiras com userId: ${userId}`);
   
   const feiras = await prisma.feira.findMany({
+    skip: skip,
+    take: limit,
+    orderBy: { data: 'asc' },
     where: { deleted: false },
     include: {
       _count: {
@@ -203,6 +211,11 @@ router.get("/", async (req, res) => {
 router.get("/filtros", async (req, res) => {
   const { tags, diaSemana, horario, pesquisa } = req.query;
 
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+
+  const skip = (page - 1) * limit;
+
   console.log(`Buscando feiras com filtros: ${JSON.stringify(req.query)}`);
   const filters: any = {
     deleted: false,
@@ -265,6 +278,9 @@ router.get("/filtros", async (req, res) => {
   }
 
   const feiras = await prisma.feira.findMany({
+    skip: skip,
+    take: limit,
+    orderBy: { data: 'asc' },
     where: filters,
     include: {
       _count: {
@@ -327,8 +343,16 @@ router.get("/filtros", async (req, res) => {
 router.get("/usuario/:userId", async (req, res) => {
   const { userId } = req.params;
 
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+
+  const skip = (page - 1) * limit;
+
   console.log(`Buscando feiras do usuário com userId: ${userId}`);
   const feiras = await prisma.feira.findMany({
+    skip: skip,
+    take: limit,
+    orderBy: { data: 'asc' },
     where: { userId: userId, deleted: false },
     include: {
       _count: {
@@ -387,8 +411,16 @@ router.get("/usuario/:userId", async (req, res) => {
 router.get("/favoritas/:userId", async (req, res) => {
   const { userId } = req.params;
 
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+
+  const skip = (page - 1) * limit;
+
   console.log(`Buscando feiras favoritadas pelo usuário com userId: ${userId}`);
   const feiras = await prisma.feira.findMany({
+    skip: skip,
+    take: limit,
+    orderBy: { data: 'asc' },
     where: {
       favoritos: {
         some: {
