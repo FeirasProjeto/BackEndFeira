@@ -79,6 +79,8 @@ router.get("/", async (req, res) => {
 
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
+  const sortBy = req.query.sortBy as string || 'data';
+  const order = req.query.order === 'desc' ? 'desc' : 'asc';
 
   const skip = (page - 1) * limit;
 
@@ -87,7 +89,7 @@ router.get("/", async (req, res) => {
   const feiras = await prisma.feira.findMany({
     skip: skip,
     take: limit,
-    orderBy: { data: 'asc' },
+    orderBy: { [sortBy]: order },
     where: { deleted: false },
     include: {
       _count: {
@@ -213,6 +215,8 @@ router.get("/filtros", async (req, res) => {
 
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
+  const sortBy = req.query.sortBy as string || 'data';
+  const order = req.query.order === 'desc' ? 'desc' : 'asc';
 
   const skip = (page - 1) * limit;
 
@@ -280,7 +284,7 @@ router.get("/filtros", async (req, res) => {
   const feiras = await prisma.feira.findMany({
     skip: skip,
     take: limit,
-    orderBy: { data: 'asc' },
+    orderBy: { [sortBy]: order },
     where: filters,
     include: {
       _count: {
@@ -345,6 +349,8 @@ router.get("/usuario/:userId", async (req, res) => {
 
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
+  const sortBy = req.query.sortBy as string || 'data';
+  const order = req.query.order === 'desc' ? 'desc' : 'asc';
 
   const skip = (page - 1) * limit;
 
@@ -352,7 +358,7 @@ router.get("/usuario/:userId", async (req, res) => {
   const feiras = await prisma.feira.findMany({
     skip: skip,
     take: limit,
-    orderBy: { data: 'asc' },
+    orderBy: { [sortBy]: order },
     where: { userId: userId, deleted: false },
     include: {
       _count: {
@@ -413,6 +419,8 @@ router.get("/favoritas/:userId", async (req, res) => {
 
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
+  const sortBy = req.query.sortBy as string || 'data';
+  const order = req.query.order === 'desc' ? 'desc' : 'asc';
 
   const skip = (page - 1) * limit;
 
@@ -420,7 +428,7 @@ router.get("/favoritas/:userId", async (req, res) => {
   const feiras = await prisma.feira.findMany({
     skip: skip,
     take: limit,
-    orderBy: { data: 'asc' },
+    orderBy: { [sortBy]: order },
     where: {
       favoritos: {
         some: {
