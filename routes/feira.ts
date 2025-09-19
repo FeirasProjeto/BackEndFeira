@@ -211,7 +211,7 @@ router.get("/", async (req, res) => {
 
 // filtros
 router.get("/filtros", async (req, res) => {
-  const { tags, diaSemana, horario, pesquisa } = req.query;
+  const { tags, diaSemana, turno, pesquisa, categoria } = req.query;
 
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
@@ -235,6 +235,7 @@ router.get("/filtros", async (req, res) => {
       where: {
         nome: {
           in: tagNomes,
+          mode: "insensitive",
         },
       },
       select: { id: true },
@@ -251,6 +252,32 @@ router.get("/filtros", async (req, res) => {
     };
   }
 
+  if (categoria) {
+    const categoriaNome = categoria as string;
+
+    const categoriaId = await prisma.categoria.findFirst({
+      where: {
+        nome: {
+          equals: categoriaNome,
+          mode: "insensitive",
+        },
+      },
+      select: { id: true },
+    });
+
+    if (categoriaId) {
+      filters.categoria = {
+        some: {
+          categoriaId: categoriaId.id,
+        },
+      };
+    } else {
+      // Se a categoria não for encontrada, retorna um array vazio
+      return res.status(200).json([]);
+    }
+  }
+
+
   if (diaSemana) {
     const nomesDias = (diaSemana as string).split(",");
 
@@ -258,6 +285,7 @@ router.get("/filtros", async (req, res) => {
       where: {
         nome: {
           in: nomesDias,
+          mode: "insensitive",
         },
       },
       select: { id: true },
@@ -274,9 +302,9 @@ router.get("/filtros", async (req, res) => {
     };
   }
 
-  if (horario) {
-    filters.horario = {
-      contains: horario as string,
+  if (turno) {
+    filters.turno = {
+      contains: turno as string,
       mode: "insensitive",
     };
   }
