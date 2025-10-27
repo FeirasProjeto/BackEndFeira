@@ -28,9 +28,20 @@ model User {
   feiras     Feira[]
   favoritos  Favorito[]
   Avaliacoes Avaliacao[]
+  pushTokens PushToken[]
 
   @@map("users")
 }
+
+model PushToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  usuario   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 
 model Favorito {
   id      String @id @default(uuid()) @db.VarChar(36)

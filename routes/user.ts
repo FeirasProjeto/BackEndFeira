@@ -4,6 +4,7 @@ import bcrypt from "bcrypt"
 import { validaSenha } from "../uteis/validaSenha"
 import multer from "multer"
 import { z } from "zod"
+import { sendPushNotification } from "../uteis/enviaNotificacoes"
 
 const prisma = new PrismaClient()
 const router = Router()
@@ -154,5 +155,34 @@ router.delete("/:id", async (req, res) => {
   res.status(200).json({message: "Usuário deletado com sucesso!", user})
 })
 
+router.post("/push-tokens", async (req, res) => {
+  const { userId, token } = req.body;
+  if (!userId || !token) {
+    return res.status(400).json({ error: "userId e token são obrigatórios" });
+  }
+
+  await prisma.pushToken.upsert({
+    where: { token },
+    update: { token, userId },
+    create: { userId, token },
+  });
+
+  res.status(200).json({ message: "Token salvo com sucesso", success: true });
+});
+
+// POST /notificar
+router.post("/notificar", async (req, res) => {
+  const { userIds, title, body, data } = req.body;
+
+  // pega os tokens desses usuários no banco
+  const tokens = await prisma.pushToken.findMany({
+    where: { userId: { in: userIds } },
+    select: { token: true },
+  });
+
+  await sendPushNotification(tokens.map((t: { token: any }) => t.token), title, body, data);
+
+  res.json({ success: true });
+});
 
 export default router
