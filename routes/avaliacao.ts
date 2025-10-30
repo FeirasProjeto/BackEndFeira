@@ -38,15 +38,22 @@ const validate = (schema: z.ZodSchema) => (req: Request, res: Response, next: Ne
 
 // Helper para atualizar média da feira
 const atualizaMediaFeira = async (feiraId: string) => {
+
+  console.log("Atualizando a média da feira:", feiraId);
+  
   const { _avg } = await prisma.avaliacao.aggregate({
     where: { feiraId },
     _avg: { nota: true },
   });
 
-  return prisma.feira.update({
+  console.log("Média atualizada:", _avg);
+
+  const feira = await prisma.feira.update({
     where: { id: feiraId },
     data: { avaliacao: _avg.nota },
   });
+
+  console.log("Média atualizada na feira:", feira.avaliacao);
 };
 
 // CRUD
@@ -121,17 +128,19 @@ router.post("/", validate(avaliacaoSchema), async (req, res) => {
       return res.status(400).json({ error: "Usuário já avaliou esta feira" });
     }
 
-    const result = await prisma.$transaction(async (tx) => {
-      const avaliacao = await tx.avaliacao.create({
+    if (nota < 1 || nota > 5) {
+      console.log(`Nota inválida: ${nota}`);
+      return res.status(400).json({ error: "Nota inválida" });
+    }
+
+      const avaliacao = await prisma.avaliacao.create({
         data: { nota, comentario, feiraId, userId },
       });
 
       await atualizaMediaFeira(feiraId);
-      return avaliacao;
-    });
 
-    console.log(`Avaliação criada: ${JSON.stringify(result)}`);
-    res.status(201).json(result);
+    console.log(`Avaliação criada: ${JSON.stringify(avaliacao)}`);
+    res.status(201).json(avaliacao);
   } catch (error) {
     console.error("Erro ao criar avaliação:", error);
     res.status(500).json({ error: "Erro ao criar avaliação" });
@@ -139,7 +148,7 @@ router.post("/", validate(avaliacaoSchema), async (req, res) => {
 });
 
 // Delete
-router.delete("/:id", validate(idParamsSchema), async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -149,14 +158,12 @@ router.delete("/:id", validate(idParamsSchema), async (req, res) => {
       return res.status(404).json({ error: "Avaliação não encontrada" });
     }
 
-    const result = await prisma.$transaction(async (tx) => {
-      const deleted = await tx.avaliacao.delete({ where: { id } });
-      await atualizaMediaFeira(deleted.feiraId);
-      return deleted;
-    });
+    const deleted = await prisma.avaliacao.delete({ where: { id } });
 
-    console.log(`Avaliação deletada: ${JSON.stringify(result)}`);
-    res.status(200).json(result);
+    await atualizaMediaFeira(deleted.feiraId);
+
+    console.log(`Avaliação deletada: ${JSON.stringify(deleted)}`);
+    res.status(200).json(deleted);
   } catch (error) {
     console.error("Erro ao deletar avaliação:", error);
     res.status(400).json({ error: "Erro ao deletar avaliação" });
