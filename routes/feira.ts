@@ -522,7 +522,7 @@ router.get("/favoritas/:userId", async (req, res) => {
 // Get feira especifica
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
-  const { userid } = req.query;
+  const { userId } = req.query;
 
   console.log(`Buscando feira com ID: ${id}`);
   const feira = await prisma.feira.findUnique({
@@ -577,21 +577,22 @@ router.get("/:id", async (req, res) => {
       }
     },
   });
-
+    
+  console.log(`Buscando feira favoritada pelo usuario: ${userId}`);
   const feiraFavorita = await prisma.feira.findUnique({
     where: { id: id },
     include: {
       favoritos: {
         where: {
-          userId: userid as string,
+          userId: userId as string,
         },
       },
     },
   })
-
+  
   let favoritada = false
 
-  if (feiraFavorita && feiraFavorita.favoritos.length > 0) {
+  if (feiraFavorita && feiraFavorita.favoritos.length > 0 && userId) {
     favoritada = true
   }
 
