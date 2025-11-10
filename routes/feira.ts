@@ -75,7 +75,7 @@ const feiraSchema = z.object({
 // CRUD
 // Read
 router.get("/", async (req, res) => {
-  const { userId } = req.query;
+  const { tags, diaSemana, turno, pesquisa, categoria, userId } = req.query;
 
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
@@ -84,150 +84,7 @@ router.get("/", async (req, res) => {
 
   const skip = (page - 1) * limit;
 
-  console.log(`Buscando feiras com userId: ${userId}`);
-  
-  const feiras = await prisma.feira.findMany({
-    skip: skip,
-    take: limit,
-    orderBy: { [sortBy]: order },
-    where: { deleted: false },
-    include: {
-      _count: {
-        select: {
-          favoritos: true,
-          Avaliacoes: true,
-        },
-      },
-      tags: {
-        select: {
-          tag: {
-            select: {
-              id: true,
-              nome: true,
-              categoria: true
-            },
-          },
-        },
-      },
-      diaSemana: {
-        select: {
-          diaSemana: true,
-        },
-      },
-      Avaliacoes: {
-        select: {
-          id: true,
-          nota: true,
-          comentario: true,
-          user: {
-            select: {
-              id: true,
-              nome: true,
-              imagem: true,
-            },
-          },
-        },
-      },
-      categoria: {
-        select: {
-          categoria: {
-            select: {
-              id: true,
-              nome: true,
-              cor: true,
-            },
-          },
-        },
-      }
-    },
-  });
-
-  console.log(`Feiras encontradas: ${feiras.length}`);
-  
-  let feirasFavoritas: string | any[] = [];
-
-  if (userId) {
-  console.log(`Buscando feiras favoritas para userId: ${userId}`);
-  
-  feirasFavoritas = await prisma.feira.findMany({
-    where: {
-      favoritos: {
-        some: {
-          userId: userId as string,
-        },
-      },
-      deleted: false,
-    },
-    include: {
-      _count: {
-        select: {
-          favoritos: true,
-          Avaliacoes: true,
-        },
-      },
-      tags: {
-        select: {
-          tag: {
-            select: {
-              id: true,
-              nome: true,
-              categoria: true
-            },
-          },
-        },
-      },
-      diaSemana: {
-        select: {
-          diaSemana: true,
-        },
-      },
-      Avaliacoes: {
-        select: {
-          id: true,
-          nota: true,
-          comentario: true,
-          user: {
-            select: {
-              id: true,
-              nome: true,
-              imagem: true,
-            },
-          },
-        },
-      },
-      categoria: {
-        select: {
-          categoria: {
-            select: {
-              id: true,
-              nome: true,
-              cor: true,
-            },
-          },
-        },
-      }
-    },
-  });
-  console.log(`Feiras favoritas encontradas: ${feirasFavoritas.length}`);
-}
-
-
-  res.status(200).json({ quantidade: feiras.length, pagina: page, feiras, feirasFavoritas });
-});
-
-// filtros
-router.get("/filtros", async (req, res) => {
-  const { tags, diaSemana, turno, pesquisa, categoria } = req.query;
-
-  const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 10;
-  const sortBy = req.query.sortBy as string || 'data';
-  const order = req.query.order === 'desc' ? 'desc' : 'asc';
-
-  const skip = (page - 1) * limit;
-
-  console.log(`Buscando feiras com filtros: ${JSON.stringify(req.query)}`);
-  const filters: any = {
+const filters: any = {
     deleted: false,
     nome: {
       contains: pesquisa as string,
@@ -283,7 +140,6 @@ router.get("/filtros", async (req, res) => {
     }
   }
 
-
   if (diaSemana) {
     const nomesDias = (diaSemana as string).split(",");
 
@@ -315,6 +171,12 @@ router.get("/filtros", async (req, res) => {
     };
   }
 
+    const totalFeiras = await prisma.feira.count({ where: filters });
+  console.log(`Total de feiras: ${totalFeiras}`);
+
+  const totalPaginas = Math.ceil(totalFeiras / limit);
+  console.log(`Total de páginas: ${totalPaginas}`);
+  
   const feiras = await prisma.feira.findMany({
     skip: skip,
     take: limit,
@@ -370,11 +232,31 @@ router.get("/filtros", async (req, res) => {
       }
     },
   });
-  if (feiras.length > 0) {
-    res.status(200).json({quantidade: feiras.length, pagina: page, feiras});
-  } else {
-    res.status(404).json({ message: "Nenhuma feira encontrada" });
-  }
+  
+  let feirasFavoritas: string | any[] = [];
+
+  if (userId) {
+  console.log(`Buscando feiras favoritas para userId: ${userId}`);
+  
+  const favoritos = await prisma.favorito.findMany({
+    where: {
+      userId: userId as string,
+    },
+    select: {
+      feiraId: true,
+    },
+  })
+  console.log(`Feiras favoritas pelo usuario: ${favoritos.length}`);
+
+  feirasFavoritas = favoritos.map((favorito) => favorito.feiraId);
+}
+
+const feirasFavoritadas = feiras.map((feira) =>({
+  ...feira,
+  favoritado: feirasFavoritas.includes(feira.id)
+}))
+
+  res.status(200).json({ quantidade: feiras.length, pagina: page, totalPaginas, feiras: feirasFavoritadas });
 });
 
 // Get feiras do usuário
