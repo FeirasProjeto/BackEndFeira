@@ -206,7 +206,7 @@ router.get("/", async (req, res) => {
   });
   console.log(`Feiras favoritas encontradas: ${feirasFavoritas.length}`);
   
-  res.status(200).json({ quantidade: feiras.length, feiras, feirasFavoritas });
+  res.status(200).json({ quantidade: feiras.length, pagina: page, feiras, feirasFavoritas });
 });
 
 // filtros
@@ -365,7 +365,7 @@ router.get("/filtros", async (req, res) => {
     },
   });
   if (feiras.length > 0) {
-    res.status(200).json(feiras);
+    res.status(200).json({quantidade: feiras.length, pagina: page, feiras});
   } else {
     res.status(404).json({ message: "Nenhuma feira encontrada" });
   }
