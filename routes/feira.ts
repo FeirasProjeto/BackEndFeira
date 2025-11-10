@@ -144,8 +144,12 @@ router.get("/", async (req, res) => {
 
   console.log(`Feiras encontradas: ${feiras.length}`);
   
-    console.log(`Buscando feiras favoritas para userId: ${userId}`);
-  const feirasFavoritas = await prisma.feira.findMany({
+  let feirasFavoritas: string | any[] = [];
+
+  if (userId) {
+  console.log(`Buscando feiras favoritas para userId: ${userId}`);
+  
+  feirasFavoritas = await prisma.feira.findMany({
     where: {
       favoritos: {
         some: {
@@ -205,7 +209,9 @@ router.get("/", async (req, res) => {
     },
   });
   console.log(`Feiras favoritas encontradas: ${feirasFavoritas.length}`);
-  
+}
+
+
   res.status(200).json({ quantidade: feiras.length, pagina: page, feiras, feirasFavoritas });
 });
 
