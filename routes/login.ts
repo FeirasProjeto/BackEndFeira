@@ -31,12 +31,6 @@ router.post("/", async (req, res) => {
       res.status(400).json({ erro: mensaPadrao });
       return;
     }
-    // Verifica se o usuario está bloqueado
-    if (usuario.bloqueado == true) {
-      console.log("Usuário bloqueado, altere a sua senha para poder efetuar o login");
-      res.status(400).json({ erro: "Usuário bloqueado, altere a sua senha para poder efetuar o login" });
-      return;
-    }
     // se o e-mail existe, faz-se a comparação dos hashs
     if (bcrypt.compareSync(senha, usuario.senha)) {
       // se confere, gera e retorna o token
@@ -64,24 +58,6 @@ router.post("/", async (req, res) => {
         }),
       ]);
     } else {
-      // res.status(400).json({ erro: "Senha incorreta" })
-
-      await prisma.$transaction([
-        prisma.user.update({
-          where: { id: usuario.id },
-          data: { tentativas: { increment: 1 } }
-        }),
-
-      ]);
-
-      if (usuario.tentativas >= 3) {
-        mensaPadrao = "Usuário bloqueado, altere a sua senha para poder efetuar o login";
-        await prisma.user.update({
-          where: { id: usuario.id, tentativas: { gte: 3 } },
-          data: { bloqueado: true }
-        })
-      }
-
       console.log("Login ou senha incorretos");
       res.status(400).json({ erro: mensaPadrao });
     }
