@@ -61,15 +61,32 @@ export function setupCleanupTasks() {
         if (!feira.diaSemana?.length) continue;
 
         const hojeNum = agora.getDay();
+        const horaAgora = agora.toTimeString().substring(0, 5);
+
+        const horaFim = feira.horarioFim || "00:00";
+
         const nomesDias = feira.diaSemana.map(d => d.diaSemana.nome);
 
         // Calcula em quantos dias ocorrerá a próxima feira
-        const diffs = nomesDias.map(nome => {
-          const diff = (diasMap[nome] - hojeNum + 7) % 7;
-          return diff === 0 ? 7 : diff; // evita 0 → não cai no mesmo dia
+        const diffs = nomesDias.map((nome) => {
+          const dia = diasMap[nome];
+          let diff = (dia - hojeNum + 7) % 7;
+
+          // se ocorre hoje, mas o horario final ainda não chegou, não atualiza
+          if (diff === 0 && horaAgora < horaFim) {
+            diff = 0;
+          }
+
+          // se ocorre hoje, mas o horario final chegou, atualiza para proxima semana
+          if (diff === 0 && horaAgora >= horaFim) {
+            diff = 7;
+          }
+
+          return diff;
         });
 
         const menorDiff = Math.min(...diffs);
+
         const proximaData = new Date(agora);
         proximaData.setDate(agora.getDate() + menorDiff);
         proximaData.setHours(0, 0, 0, 0);

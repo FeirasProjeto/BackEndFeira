@@ -675,6 +675,8 @@ router.post("/", upload.single("imagem"), async (req, res) => {
     const agora = new Date();
     const hojeNum = agora.getDay();
 
+    const horaAgora = agora.toTimeString().substring(0, 5);
+
     const diasMap: Record<string, number> = {
         "Domingo": 0,
         "Segunda-feira": 1,
@@ -700,8 +702,18 @@ router.post("/", upload.single("imagem"), async (req, res) => {
 
     // Calcula em quantos dias ocorrerá a próxima feira
     const diffs = nomesDias.map(nome => {
-      const diff = (diasMap[nome] - hojeNum + 7) % 7;
-      return diff === 0 ? 7 : diff; // evita 0 → não cai no mesmo dia
+      const dia = diasMap[nome];
+      let diff = (dia - hojeNum + 7) % 7;
+
+      if (diff === 0 && horaAgora < feira.horarioFim) {
+        diff = 0;
+      }
+
+      if (diff === 0 && horaAgora >= feira.horarioFim) {
+        diff = 7;
+      }
+
+      return diff;
     });
 
     const menorDiff = Math.min(...diffs);
