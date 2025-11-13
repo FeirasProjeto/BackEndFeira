@@ -28,7 +28,7 @@ export function setupCleanupTasks() {
     }
   });
 
-  schedule.scheduleJob("0 * * * *", async () => {
+  schedule.scheduleJob("0 1 * * * *", async () => {
     try {
       const agora = new Date();
 

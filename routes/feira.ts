@@ -84,7 +84,7 @@ router.get("/", async (req, res) => {
 
   const skip = (page - 1) * limit;
 
-const filters: any = {
+  const filters: any = {
     deleted: false,
     nome: {
       contains: pesquisa as string,
@@ -171,12 +171,12 @@ const filters: any = {
     };
   }
 
-    const totalFeiras = await prisma.feira.count({ where: filters });
+  const totalFeiras = await prisma.feira.count({ where: filters });
   console.log(`Total de feiras: ${totalFeiras}`);
 
   const totalPaginas = Math.ceil(totalFeiras / limit);
   console.log(`Total de páginas: ${totalPaginas}`);
-  
+
   const feiras = await prisma.feira.findMany({
     skip: skip,
     take: limit,
@@ -232,29 +232,29 @@ const filters: any = {
       }
     },
   });
-  
+
   let feirasFavoritas: string | any[] = [];
 
   if (userId) {
-  console.log(`Buscando feiras favoritas para userId: ${userId}`);
-  
-  const favoritos = await prisma.favorito.findMany({
-    where: {
-      userId: userId as string,
-    },
-    select: {
-      feiraId: true,
-    },
-  })
-  console.log(`Feiras favoritas pelo usuario: ${favoritos.length}`);
+    console.log(`Buscando feiras favoritas para userId: ${userId}`);
 
-  feirasFavoritas = favoritos.map((favorito) => favorito.feiraId);
-}
+    const favoritos = await prisma.favorito.findMany({
+      where: {
+        userId: userId as string,
+      },
+      select: {
+        feiraId: true,
+      },
+    })
+    console.log(`Feiras favoritas pelo usuario: ${favoritos.length}`);
 
-const feirasFavoritadas = feiras.map((feira) =>({
-  ...feira,
-  favoritado: feirasFavoritas.includes(feira.id)
-}))
+    feirasFavoritas = favoritos.map((favorito) => favorito.feiraId);
+  }
+
+  const feirasFavoritadas = feiras.map((feira) => ({
+    ...feira,
+    favoritado: feirasFavoritas.includes(feira.id)
+  }))
 
   res.status(200).json({ quantidade: feiras.length, pagina: page, totalPaginas, feiras: feirasFavoritadas });
 });
@@ -465,7 +465,7 @@ router.get("/:id", async (req, res) => {
       }
     },
   });
-    
+
   console.log(`Buscando feira favoritada pelo usuario: ${userId}`);
   const feiraFavorita = await prisma.feira.findUnique({
     where: { id: id },
@@ -477,14 +477,14 @@ router.get("/:id", async (req, res) => {
       },
     },
   })
-  
+
   let favoritada = false
 
   if (feiraFavorita && feiraFavorita.favoritos.length > 0 && userId) {
     favoritada = true
   }
 
-  res.status(200).json({feira, favoritada});
+  res.status(200).json({ feira, favoritada });
 });
 
 // Create
@@ -505,7 +505,7 @@ router.post("/", upload.single("imagem"), async (req, res) => {
 
   let { tags, diaSemana } = req.body;
 
-console.log(`Dados recebidos: ${JSON.stringify(req.body)}`);
+  console.log(`Dados recebidos: ${JSON.stringify(req.body)}`);
 
   const imagem = req.file?.buffer.toString("base64") || null;
 
@@ -531,26 +531,26 @@ console.log(`Dados recebidos: ${JSON.stringify(req.body)}`);
   ) {
     console.log("Campos obrigatórios não preenchidos");
     return res.status(400).json({
-        message: "Todos os campos devem ser preenchidos",
-        campoFaltante: !nome
-          ? "nome"
-          : !endereco
-            ? "endereco"
-            : !numero
-              ? "numero"
-              : !cidade
-                ? "cidade"
-                : !coordenada
-                  ? "coordenada"
-                  : !horarioInicio
-                    ? "horarioInicio"
-                    : !horarioFim
-                      ? "horarioFim"
-                      : !userId
-                        ? "userId"
-                        : "",
-        categoria: !categoria ? "categoria" : "",
-      });
+      message: "Todos os campos devem ser preenchidos",
+      campoFaltante: !nome
+        ? "nome"
+        : !endereco
+          ? "endereco"
+          : !numero
+            ? "numero"
+            : !cidade
+              ? "cidade"
+              : !coordenada
+                ? "coordenada"
+                : !horarioInicio
+                  ? "horarioInicio"
+                  : !horarioFim
+                    ? "horarioFim"
+                    : !userId
+                      ? "userId"
+                      : "",
+      categoria: !categoria ? "categoria" : "",
+    });
   }
 
   console.log(`Verificando horários: Início - ${horarioInicio}, Fim - ${horarioFim}`);
@@ -581,7 +581,7 @@ console.log(`Dados recebidos: ${JSON.stringify(req.body)}`);
 
   console.log(`Turno determinado: ${turno}`);
   console.log("Criando nova feira");
-  
+
   const feira = await prisma.feira.create({
     data: {
       nome,
@@ -599,13 +599,13 @@ console.log(`Dados recebidos: ${JSON.stringify(req.body)}`);
   });
 
   console.log(`Feira criada com ID: ${feira.id}`);
-  
+
   if (tags && tags.length > 0) {
     console.log(`Adicionando tags para a feira ${feira.id}:`, tags);
-    
+
     for (const tag of tags) {
       console.log(`Verificando se a tag ${tag} existe...`);
-      
+
       const tagExists = await prisma.tag.findFirst({
         where: { nome: tag },
       });
@@ -670,12 +670,61 @@ console.log(`Dados recebidos: ${JSON.stringify(req.body)}`);
       });
     }
 
-    console.log(`Dias da semana adicionados para a feira ${feira.id}`);
+    console.log(`Dias da semana adicionados para a feira ${feira.nome}`);
+
+    const agora = new Date();
+    const hojeNum = agora.getDay();
+
+    const diasMap: Record<string, number> = {
+        "Domingo": 0,
+        "Segunda-feira": 1,
+        "Terça-feira": 2,
+        "Quarta-feira": 3,
+        "Quinta-feira": 4,
+        "Sexta-feira": 5,
+        "Sábado": 6,
+      };
+
+      const feiraAtualizada = await prisma.feira.findUnique({
+        where: { id: String(feira.id) },
+        include: {
+          diaSemana: {
+            select: {
+              diaSemana: {select: {nome: true}}
+            }
+          }
+        }
+      });
+      
+    const nomesDias = feiraAtualizada?.diaSemana.map(d => d.diaSemana.nome) || [];
+
+    // Calcula em quantos dias ocorrerá a próxima feira
+    const diffs = nomesDias.map(nome => {
+      const diff = (diasMap[nome] - hojeNum + 7) % 7;
+      return diff === 0 ? 7 : diff; // evita 0 → não cai no mesmo dia
+    });
+
+    const menorDiff = Math.min(...diffs);
+    const proximaData = new Date(agora);
+    proximaData.setDate(agora.getDate() + menorDiff);
+    proximaData.setHours(0, 0, 0, 0);
+
+    console.log(feira.nome, proximaData);
+    
+    await prisma.feira.update({
+      where: { id: feira.id },
+      data: { proximaOcorrencia: proximaData },
+    });
+
+    console.log(
+      `Feira "${feira.nome}" → próxima ocorrência em ${proximaData.toLocaleDateString("pt-BR")}`
+    );
+
     res.status(201).json(feira);
   } else {
     const feiraDia = await prisma.feira.update({
       where: { id: feira.id },
-      data: { 
+      data: {
         data: new Date(data),
         proximaOcorrencia: new Date(data)
       },
