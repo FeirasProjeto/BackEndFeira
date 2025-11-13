@@ -24,7 +24,7 @@ model User {
   token      String?
   tentativas Int         @default(0)
   telefone   String?
-  feirante   Boolean     @default(false)
+  admin      Boolean     @default(false)
   feiras     Feira[]
   favoritos  Favorito[]
   Avaliacoes Avaliacao[]
@@ -42,7 +42,6 @@ model PushToken {
   updatedAt DateTime @updatedAt
 }
 
-
 model Favorito {
   id      String @id @default(uuid()) @db.VarChar(36)
   userId  String
@@ -54,28 +53,29 @@ model Favorito {
 }
 
 model Feira {
-  id            String           @id @default(uuid()) @db.VarChar(36)
-  createdAt     DateTime         @default(now())
-  deleted       Boolean          @default(false)
-  nome          String
-  endereco      String
-  numero        String
-  cidade        String
-  coordenada    String //-26.308418, -55.130870
-  horarioInicio String           @default("00:00")
-  horarioFim    String           @default("00:00")
-  turno         String           @default("Não informado")
-  data          DateTime?
-  descricao     String?
-  imagem        String?          @default("https://i.imgur.com/4Y0v1xk.png") @db.Text
-  avaliacao     Float?           @default(0)
-  tags          FeiraTag[]
-  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId        String
-  favoritos     Favorito[]
-  diaSemana     DiaSemanaFeira[]
-  Avaliacoes    Avaliacao[]
-  categoria     CategoriaFeira[]
+  id                String           @id @default(uuid()) @db.VarChar(36)
+  createdAt         DateTime         @default(now())
+  deleted           Boolean          @default(false)
+  nome              String
+  endereco          String
+  numero            String
+  cidade            String
+  coordenada        String //-26.308418, -55.130870
+  horarioInicio     String           @default("00:00")
+  horarioFim        String           @default("00:00")
+  turno             String           @default("Não informado")
+  data              DateTime?
+  proximaOcorrencia DateTime?
+  descricao         String?
+  imagem            String?          @default("https://i.imgur.com/4Y0v1xk.png") @db.Text
+  avaliacao         Float?           @default(0)
+  tags              FeiraTag[]
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String
+  favoritos         Favorito[]
+  diaSemana         DiaSemanaFeira[]
+  Avaliacoes        Avaliacao[]
+  categoria         CategoriaFeira[]
 }
 
 model DiaSemana {
@@ -121,7 +121,7 @@ model Avaliacao {
   feiraId    String
   feira      Feira    @relation(fields: [feiraId], references: [id], onDelete: Cascade)
   userId     String
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("avaliacoes")
 }

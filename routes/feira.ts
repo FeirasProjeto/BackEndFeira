@@ -79,7 +79,7 @@ router.get("/", async (req, res) => {
 
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
-  const sortBy = req.query.sortBy as string || 'data';
+  const sortBy = req.query.sortBy as string || 'proximaOcorrencia';
   const order = req.query.order === 'desc' ? 'desc' : 'asc';
 
   const skip = (page - 1) * limit;
@@ -675,7 +675,10 @@ console.log(`Dados recebidos: ${JSON.stringify(req.body)}`);
   } else {
     const feiraDia = await prisma.feira.update({
       where: { id: feira.id },
-      data: { data: new Date(data) },
+      data: { 
+        data: new Date(data),
+        proximaOcorrencia: new Date(data)
+      },
     });
 
     console.log(`Feira criada sem dias da semana, data definida: ${feiraDia.data}`);
