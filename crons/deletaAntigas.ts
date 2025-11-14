@@ -3,7 +3,7 @@ import schedule from "node-schedule";
 
 const prisma = new PrismaClient();
 
-export default async function header() {
+export default async function header(req: any, res: any) {
   // Roda a limpeza automática de feiras expiradas diariamente à meia-noite
   try {
     const today = new Date();

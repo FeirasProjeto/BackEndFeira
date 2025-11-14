@@ -13,6 +13,7 @@ import loginRoutes from './routes/login';
 import altSenhaRoutes from './routes/altSenha';
 import avaliacaoRoutes from './routes/avaliacao';
 import categoriaRoutes from './routes/categoria';
+import cronRoutes from './routes/crons';
 
 const app = express();
 const port = process.env.PORT ?? 3000;
@@ -34,6 +35,7 @@ app.use('/login', loginRoutes);
 app.use('/altSenha', altSenhaRoutes);
 app.use('/avaliacao', avaliacaoRoutes);
 app.use('/categoria', categoriaRoutes);
+app.use('/crons', cronRoutes);
 
 // Rota do Swagger UI
 app.use('/api-docs', 
