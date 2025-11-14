@@ -14,11 +14,11 @@
     ],
     "crons": [
         {
-            "path": "crons/deletaAntigas",
+            "path": "/crons/deletaAntigas",
             "schedule": "0 0 * * *"
         },
         {
-            "path": "crons/atualizaProximaOcorrencia",
+            "path": "/crons/atualizaProximaOcorrencia",
             "schedule": "1 0 * * *"
         }
     ]
