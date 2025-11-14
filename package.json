@@ -32,6 +32,7 @@
     "@sendgrid/mail": "^8.1.5",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
+    "dayjs": "^1.11.19",
     "expo-server-sdk": "^4.0.0",
     "express": "^4.19.1",
     "jsonwebtoken": "^9.0.2",
@@ -44,6 +45,8 @@
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-dist": "^5.25.2",
     "swagger-ui-express": "^5.0.1",
+    "timezone": "^1.0.23",
+    "utc": "^0.1.0",
     "yamljs": "^0.3.0",
     "zod": "^3.25.67"
   }

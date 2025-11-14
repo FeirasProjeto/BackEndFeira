@@ -11,5 +11,15 @@
             "src": "(.*)",
             "dest": "index.ts"
         }
+    ],
+    "crons": [
+        {
+            "path": "/crons/deletaAntigas",
+            "schedule": "0 0 * * *"
+        },
+        {
+            "path": "/crons/atualizaProximaOcorrencia",
+            "schedule": "1 * * * *"
+        }
     ]
 }
