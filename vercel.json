@@ -19,7 +19,7 @@
         },
         {
             "path": "/crons/atualizaProximaOcorrencia",
-            "schedule": "1 * * * *"
+            "schedule": "1 0 * * *"
         }
     ]
 }
