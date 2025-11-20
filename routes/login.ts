@@ -48,6 +48,7 @@ router.post("/", async (req, res) => {
         id: usuario.id,
         nome: usuario.nome,
         email: usuario.email,
+        admin: usuario.admin,
         token
       });
 
