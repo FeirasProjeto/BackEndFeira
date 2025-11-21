@@ -39,4 +39,15 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+// Create
+router.post("/", async (req, res) => {
+  const { nome } = req.body;
+  const diaSemana = await prisma.diaSemana.create({
+    data: {
+      nome: nome
+    }
+  });
+  res.status(201).json(diaSemana);
+});
+
 export default router;

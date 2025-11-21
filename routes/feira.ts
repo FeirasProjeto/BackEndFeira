@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { Router } from "express";
 import { z } from "zod";
 import multer from "multer"
+import { put } from "@vercel/blob"
 
 const prisma = new PrismaClient();
 const router = Router();
@@ -507,7 +508,26 @@ router.post("/", upload.single("imagem"), async (req, res) => {
 
   console.log(`Dados recebidos: ${JSON.stringify(req.body)}`);
 
-  const imagem = req.file?.buffer.toString("base64") || null;
+  let imagemUrl: string | null = null;
+
+  try {
+    if (req.file) {
+      const uploaded = await put(
+        `feiras/${Date.now()}-${req.file.originalname}`,
+        req.file.buffer,
+        {
+          access: "public",
+          token: process.env.BLOB_READ_WRITE_TOKEN,
+        }
+      );
+      imagemUrl = uploaded.url;
+      console.log("Imagem enviada para o Blob:", imagemUrl);
+    }
+  } catch (err) {
+    console.error("Erro no upload para Blob:", err);
+    return res.status(500).json({ message: "Falha ao enviar imagem" });
+  }
+
 
   if (tags) {
     tags = JSON.parse(tags);
@@ -592,7 +612,7 @@ router.post("/", upload.single("imagem"), async (req, res) => {
       horarioInicio,
       horarioFim,
       descricao,
-      imagem,
+      imagem: imagemUrl,
       userId,
       turno,
     },
@@ -791,7 +811,25 @@ router.patch("/:id", upload.single("imagem"), async (req, res) => {
 
   let { tags, diaSemana } = req.body;
 
-  const imagem = req.file?.buffer.toString("base64") || null;
+  let imagemUrl: string | null = null;
+
+  try {
+    if (req.file) {
+      const uploaded = await put(
+        `feiras/${Date.now()}-${req.file.originalname}`,
+        req.file.buffer,
+        {
+          access: "public",
+          token: process.env.BLOB_READ_WRITE_TOKEN,
+        }
+      );
+      imagemUrl = uploaded.url;
+      console.log("Imagem enviada para o Blob:", imagemUrl);
+    }
+  } catch (err) {
+    console.error("Erro no upload para Blob:", err);
+    return res.status(500).json({ message: "Falha ao enviar imagem" });
+  }
 
   console.log(`Atualizando feira com ID: ${id}`);
 
@@ -824,7 +862,7 @@ router.patch("/:id", upload.single("imagem"), async (req, res) => {
       horarioInicio,
       horarioFim,
       descricao,
-      imagem,
+      imagem: imagemUrl,
       data,
       turno
     },

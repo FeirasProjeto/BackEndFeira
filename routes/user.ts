@@ -5,6 +5,7 @@ import { validaSenha } from "../uteis/validaSenha"
 import multer from "multer"
 import { z } from "zod"
 import { sendPushNotification } from "../uteis/enviaNotificacoes"
+import { put } from "@vercel/blob"
 
 const prisma = new PrismaClient()
 const router = Router()
@@ -68,7 +69,26 @@ router.post("/", upload.single("imagem"), async (req, res) => {
     telefone
   } = req.body
 
-  const imagem = req.file?.buffer.toString("base64") || null;
+
+  let imagemUrl: string | null = null;
+
+  try {
+    if (req.file) {
+      const uploaded = await put(
+        `users/${Date.now()}-${req.file.originalname}`,
+        req.file.buffer,
+        {
+          access: "public",
+          token: process.env.BLOB_READ_WRITE_TOKEN,
+        }
+      );
+      imagemUrl = uploaded.url;
+      console.log("Imagem enviada para o Blob:", imagemUrl);
+    }
+  } catch (err) {
+    console.error("Erro no upload para Blob:", err);
+    return res.status(500).json({ message: "Falha ao enviar imagem" });
+  }
 
   if (
     !nome ||
@@ -113,7 +133,7 @@ router.post("/", upload.single("imagem"), async (req, res) => {
   // para o campo senha, atribui o hash gerado
   try {
     const user = await prisma.user.create({
-      data: { nome, email, senha: hash, telefone, imagem }
+      data: { nome, email, senha: hash, telefone, imagem: imagemUrl }
     })
     console.log(`Usuário criado`);
     res.status(201).json(user)
@@ -129,13 +149,31 @@ router.patch("/:id", upload.single("imagem"), async (req, res) => {
   const { id } = req.params
   const { nome, email, telefone } = req.body
 
-  const imagem = req.file?.buffer.toString("base64") || null;
+  let imagemUrl: string | null = null;
+
+  try {
+    if (req.file) {
+      const uploaded = await put(
+        `users/${Date.now()}-${req.file.originalname}`,
+        req.file.buffer,
+        {
+          access: "public",
+          token: process.env.BLOB_READ_WRITE_TOKEN,
+        }
+      );
+      imagemUrl = uploaded.url;
+      console.log("Imagem enviada para o Blob:", imagemUrl);
+    }
+  } catch (err) {
+    console.error("Erro no upload para Blob:", err);
+    return res.status(500).json({ message: "Falha ao enviar imagem" });
+  }
 
   console.log(`Atualizando usuário ${id}`);
 
   const user = await prisma.user.update({
     where: { id: id },
-    data: { nome, email, telefone, imagem }
+    data: { nome, email, telefone, imagem: imagemUrl }
   })
   console.log(`Usuário atualizado com sucesso`);
   res.status(200).json(user)
