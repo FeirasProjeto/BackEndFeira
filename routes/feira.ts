@@ -678,26 +678,26 @@ router.post("/", upload.single("imagem"), async (req, res) => {
     const horaAgora = agora.toTimeString().substring(0, 5);
 
     const diasMap: Record<string, number> = {
-        "Domingo": 0,
-        "Segunda-feira": 1,
-        "Terça-feira": 2,
-        "Quarta-feira": 3,
-        "Quinta-feira": 4,
-        "Sexta-feira": 5,
-        "Sábado": 6,
-      };
+      "Domingo": 0,
+      "Segunda-feira": 1,
+      "Terça-feira": 2,
+      "Quarta-feira": 3,
+      "Quinta-feira": 4,
+      "Sexta-feira": 5,
+      "Sábado": 6,
+    };
 
-      const feiraAtualizada = await prisma.feira.findUnique({
-        where: { id: String(feira.id) },
-        include: {
-          diaSemana: {
-            select: {
-              diaSemana: {select: {nome: true}}
-            }
+    const feiraAtualizada = await prisma.feira.findUnique({
+      where: { id: String(feira.id) },
+      include: {
+        diaSemana: {
+          select: {
+            diaSemana: { select: { nome: true } }
           }
         }
-      });
-      
+      }
+    });
+
     const nomesDias = feiraAtualizada?.diaSemana.map(d => d.diaSemana.nome) || [];
 
     // Calcula em quantos dias ocorrerá a próxima feira
@@ -722,7 +722,7 @@ router.post("/", upload.single("imagem"), async (req, res) => {
     proximaData.setHours(0, 0, 0, 0);
 
     console.log(feira.nome, proximaData);
-    
+
     await prisma.feira.update({
       where: { id: feira.id },
       data: { proximaOcorrencia: proximaData },
@@ -783,37 +783,50 @@ router.patch("/deletar-expiradas", async (req, res) => {
 router.patch("/:id", upload.single("imagem"), async (req, res) => {
   const { id } = req.params;
   const {
-    nome,
-    endereco,
-    numero,
-    cidade,
-    coordenada,
-    diaSemana,
-    tags,
     horarioInicio,
     horarioFim,
     descricao,
-    turno,
-    categoria
+    data
   } = req.body;
+
+  let { tags, diaSemana } = req.body;
 
   const imagem = req.file?.buffer.toString("base64") || null;
 
   console.log(`Atualizando feira com ID: ${id}`);
 
+  let turno = "";
+  if (horarioInicio && horarioFim) {
+    console.log(`Horários recebidos: Início - ${horarioInicio}, Fim - ${horarioFim}`);
+
+    const [hora] = horarioInicio.split(":").map(Number);
+    const [horaFim] = horarioFim.split(":").map(Number);
+
+    if (hora < 12 && horaFim < 12) {
+      turno = "Manhã";
+    } else if (hora >= 12 && horaFim < 18) {
+      turno = "Tarde";
+    } else if (hora < 12 && horaFim <= 18) {
+      turno = "Manhã e Tarde";
+    } else if (hora >= 18 && horaFim >= 18) {
+      turno = "Noite";
+    } else if (hora >= 12 && horaFim >= 18) {
+      turno = "Tarde e Noite";
+    } else {
+      turno = "Dia inteiro";
+    }
+
+  }
+
   const feira = await prisma.feira.update({
     where: { id: id },
     data: {
-      nome,
-      endereco,
-      numero,
-      cidade,
-      coordenada,
       horarioInicio,
       horarioFim,
       descricao,
       imagem,
-      turno,
+      data,
+      turno
     },
   });
 
@@ -855,30 +868,6 @@ router.patch("/:id", upload.single("imagem"), async (req, res) => {
           diaSemanaId: diaSemana.id,
           feiraId: id,
         }
-      });
-    }
-  }
-
-  if (categoria) {
-    console.log(`Atualizando categoria para a feira ${id} com categoria ${categoria}`);
-
-    const categoriaFeira = await prisma.categoriaFeira.findFirst({
-      where: { feiraId: id },
-    });
-
-    if (categoriaFeira) {
-      console.log(`Categoria feira encontrada: ${categoriaFeira}`);
-      await prisma.categoriaFeira.update({
-        where: { categoriaId_feiraId: { categoriaId: categoriaFeira.categoriaId, feiraId: categoriaFeira.feiraId } },
-        data: { categoriaId: Number(categoria) },
-      });
-    } else {
-      console.log(`Categoria feira não encontrada, criando nova associação`);
-      await prisma.categoriaFeira.create({
-        data: {
-          feiraId: id,
-          categoriaId: Number(categoria),
-        },
       });
     }
   }
