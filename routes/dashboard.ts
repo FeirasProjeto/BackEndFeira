@@ -92,7 +92,7 @@ router.get("/", async (req, res) => {
 
 router.get("/feiras", async (req, res) => {
   const feiras = await prisma.feira.findMany({
-    where: { aprovada: false },
+    where: { aprovada: false, deleted: false },
     orderBy: { createdAt: "asc" },
   })
 
