@@ -87,6 +87,7 @@ router.get("/", async (req, res) => {
 
   const filters: any = {
     deleted: false,
+    aprovada: true,
     nome: {
       contains: pesquisa as string,
       mode: "insensitive",
