@@ -874,14 +874,27 @@ router.patch("/:id", upload.single("imagem"), async (req, res) => {
       where: { feiraId: id },
     });
 
+    tags = JSON.parse(tags);
+
     // Adiciona novas tags
     for (const tag of tags) {
-      await prisma.feiraTag.create({
+      const findTag = await prisma.tag.findFirst({
+        where: { nome: tag },
+      })
+
+      if (!findTag) {
+        console.log("Ignorando tag inexistente:", tag);
+      }
+      if (findTag) {
+        console.log("Adicionando tag: ", tag);
+        
+        await prisma.feiraTag.create({
         data: {
           feiraId: id,
-          tagId: tag.id,
+          tagId: findTag.id,
         },
       });
+    }
     }
   }
 
