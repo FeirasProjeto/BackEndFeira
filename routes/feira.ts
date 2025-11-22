@@ -904,8 +904,12 @@ router.patch("/:id", upload.single("imagem"), async (req, res) => {
       where: { feiraId: id },
     });
 
+    diaSemana = JSON.parse(diaSemana);
+
     // Adiciona novos dias
     for (const dia of diaSemana) {
+      console.log("Adicionando dia: ", dia);
+      
       const diaSemana = await prisma.diaSemana.findFirst({
         where: { nome: dia },
       });
