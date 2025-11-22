@@ -809,9 +809,16 @@ router.patch("/:id", upload.single("imagem"), async (req, res) => {
     data
   } = req.body;
 
+  const feiraAtual = await prisma.feira.findUnique({
+    where: { id },
+    select: { 
+      imagem: true,
+    }
+  })
+
   let { tags, diaSemana } = req.body;
 
-  let imagemUrl: string | null = null;
+  let imagemUrl = feiraAtual?.imagem ?? null;
 
   try {
     if (req.file) {

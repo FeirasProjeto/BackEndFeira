@@ -149,7 +149,13 @@ router.patch("/:id", upload.single("imagem"), async (req, res) => {
   const { id } = req.params
   const { nome, email, telefone } = req.body
 
-  let imagemUrl: string | null = null;
+  const userAtual = await prisma.user.findUnique({
+    where: { id: id },
+    select: {
+      imagem: true
+    }
+  })
+  let imagemUrl = userAtual?.imagem || null;
 
   try {
     if (req.file) {
