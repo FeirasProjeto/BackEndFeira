@@ -110,4 +110,14 @@ router.patch("/aprovar/:id", async (req, res) => {
   res.status(200).json(feira)
 })
 
+router.delete("/reprovar/:id", async (req, res) => {
+  const { id } = req.params
+
+  const feira = await prisma.feira.delete({
+    where: { id }
+  })
+
+  res.status(200).json(feira)
+})
+
 export default router
